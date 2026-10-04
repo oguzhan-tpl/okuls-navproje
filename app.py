@@ -16,7 +16,7 @@ from flask import (
     send_file, session, url_for
 )
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func, select, text
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.dialects.mysql import MEDIUMBLOB
 from sqlalchemy.exc import IntegrityError, OperationalError
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -879,7 +879,7 @@ def create_app():
                 Project.archived.is_(False),
             )
             .filter(
-                db.or_(
+                or_(
                     project_class_link.c.class_id == user.class_id,
                     project_class_link.c.project_id.is_(None),
                 )
