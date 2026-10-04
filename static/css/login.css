@@ -181,3 +181,58 @@ linear-gradient(135deg,#07101c,#0e1d31 52%,#08111e)}
   .portal-intro h1{font-size:39px}.portal-intro p{font-size:11px}
   .login-panel{padding:20px}.panel-title h2{font-size:16px}.panel-text{font-size:10px}
 }
+
+
+/* Classic institutional portal palette */
+.login-body{background:#2c2927;color:#292724}
+.portal-overlay{
+  background:
+    linear-gradient(180deg,rgba(39,35,33,.78),rgba(39,35,33,.69)),
+    linear-gradient(90deg,rgba(39,35,33,.45),rgba(39,35,33,.14),rgba(39,35,33,.45));
+}
+.portal-intro>span{color:#d3abad}
+.portal-login-grid{gap:22px}
+.login-panel{
+  border-color:#d8d1c8;
+  background:#fbfaf7;
+  box-shadow:0 22px 58px rgba(37,33,31,.22);
+}
+.panel-line{background:#7a2f35}.panel-line.student{background:#536c59}
+.panel-icon{background:#f1ece7;border-color:#ded7ce}
+.teacher-icon{color:#7a2f35}.student-icon{color:#536c59;background:#edf1ed}
+.panel-text{color:#6f6961}
+.login-form label>span{color:#756e66}
+.input-box{
+  background:#fff;border-color:#d7d0c7;color:#8b827a
+}
+.input-box:focus-within{border-color:#9c686b;box-shadow:0 0 0 3px rgba(122,47,53,.09)}
+.input-box input{color:#292724}
+.teacher-button{background:#7a2f35}.student-button{background:#536c59}
+.chief-strip{
+  background:rgba(43,39,37,.84);
+  border-color:rgba(255,255,255,.16);
+}
+.chief-icon{color:#d3abad;border-color:rgba(211,171,173,.22)}
+.chief-strip small{color:#a69d95}
+.chief-strip>b{color:#d0c0bb}
+.portal-footer{color:rgba(255,255,255,.46)}
+.chief-auth{background:#2b2725}
+.chief-auth-bg{
+  background:
+    radial-gradient(circle at 72% 24%,rgba(122,47,53,.20),transparent 29%),
+    radial-gradient(circle at 20% 78%,rgba(83,108,89,.10),transparent 28%),
+    linear-gradient(135deg,#2a2725,#39312f 52%,#292522);
+}
+.chief-auth-card{background:#302c2a;border-color:#4b423d}
+.chief-brand-icon{background:#39322f;border-color:#5b4b46;color:#d3abad}
+.chief-brand-row{border-bottom-color:#4b413c}
+.chief-auth-copy .eyebrow{color:#d3abad}
+.chief-auth-copy p{color:#b1a79e}
+.chief-form label>span{color:#a69b92}
+.chief-input{background:#252220;border-color:#514741;color:#9d9087}
+.chief-input:focus-within{border-color:#b57d80;box-shadow:0 0 0 3px rgba(122,47,53,.13)}
+.chief-submit{background:#f3eee8;color:#2b2725}
+.back-login{color:#b0a59d}
+@media(max-width:820px){
+  .portal-intro>span{font-size:8px}
+}
