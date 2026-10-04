@@ -50,13 +50,20 @@
     <div class="page-wrap">{% block content %}{% endblock %}</div>
   </main>
 </div>
-<div class="app-loader" data-app-loader aria-live="polite" aria-label="Sayfa yükleniyor">
-  <div class="app-loader-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="app-loader-copy">
-    <strong data-loader-title>Hazırlanıyor</strong>
-    <span data-loader-text>Çalışma alanınız açılıyor.</span>
+<div class="app-loader" data-app-loader aria-live="polite" aria-label="İşlem sürüyor">
+  <div class="app-loader-card">
+    <div class="app-loader-topline">
+      <span class="app-loader-brand">OSP</span>
+      <span class="app-loader-state">İŞLEM SÜRÜYOR</span>
+    </div>
+    <div class="app-loader-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="app-loader-copy">
+      <strong data-loader-title>Hazırlanıyor</strong>
+      <span data-loader-text>İşleminiz güvenli şekilde uygulanıyor.</span>
+    </div>
+    <div class="app-loader-progress" aria-hidden="true"><span></span></div>
+    <small class="app-loader-hint">Bu sırada sayfayı kapatmayın.</small>
   </div>
-  <button type="button" class="app-loader-retry" data-loader-retry hidden>Yeniden dene</button>
 </div>
 <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 </body>
