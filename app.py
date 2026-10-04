@@ -573,7 +573,8 @@ def create_app():
     @login_required("teacher")
     def teacher_create_project():
         if request.method == "POST":
-            csrf_protect()
+            if not csrf_protect():
+                return redirect(request.referrer or url_for("teacher_dashboard"))
             title = request.form.get("title", "").strip()
             course = request.form.get("course", "").strip()
             description = request.form.get("description", "").strip()
@@ -708,7 +709,8 @@ def create_app():
     @app.post("/teacher/projects/<int:project_id>/archive")
     @login_required("teacher")
     def teacher_project_archive(project_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("teacher_dashboard"))
         project = db.session.get(Project, project_id)
         if not project or project.teacher_id != get_current_user().id:
             abort(404)
@@ -809,7 +811,8 @@ def create_app():
     @app.post("/student/projects/<int:project_id>/submit")
     @login_required("student")
     def student_submit(project_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("student_project_detail", project_id=project_id))
         user = get_current_user()
         project = db.session.get(Project, project_id)
         if (
@@ -1020,7 +1023,8 @@ def create_app():
             .all()
         )
         if request.method == "POST":
-            csrf_protect()
+            if not csrf_protect():
+                return redirect(request.referrer or url_for("chief_users"))
             role = request.form.get("role", "").strip()
             username = request.form.get("username", "").strip().lower()
             full_name = request.form.get("full_name", "").strip()
@@ -1079,7 +1083,8 @@ def create_app():
     @app.post("/chief/users/<int:user_id>/toggle")
     @login_required("chief")
     def chief_toggle_user(user_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("chief_users"))
         user = db.session.get(User, user_id)
         if not user or user.role == "chief":
             abort(404)
@@ -1091,7 +1096,8 @@ def create_app():
     @app.post("/chief/users/<int:user_id>/class")
     @login_required("chief")
     def chief_change_student_class(user_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("chief_users"))
         user = db.session.get(User, user_id)
         if not user or user.role != "student":
             abort(404)
@@ -1115,7 +1121,8 @@ def create_app():
     @app.post("/chief/users/<int:user_id>/reset-password")
     @login_required("chief")
     def chief_reset_password(user_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("chief_users"))
         user = db.session.get(User, user_id)
         if not user or user.role == "chief":
             abort(404)
@@ -1132,7 +1139,8 @@ def create_app():
     @login_required("chief")
     def chief_classes():
         if request.method == "POST":
-            csrf_protect()
+            if not csrf_protect():
+                return redirect(request.referrer or url_for("chief_classes"))
             grade_raw = request.form.get("grade", "").strip()
             section = request.form.get("section", "").strip().upper()
 
@@ -1165,7 +1173,8 @@ def create_app():
     @app.post("/chief/classes/<int:class_id>/toggle")
     @login_required("chief")
     def chief_toggle_class(class_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("chief_classes"))
         classroom = db.session.get(Classroom, class_id)
         if not classroom:
             abort(404)
