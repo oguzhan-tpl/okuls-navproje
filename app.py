@@ -372,6 +372,8 @@ def create_app():
 
     @app.errorhandler(OperationalError)
     def database_error(_error):
+        global _db_ready
+        _db_ready = False
         db.session.rollback()
         db.session.remove()
         try:
@@ -448,7 +450,7 @@ def create_app():
             return wrapped
         return decorator
 
-    def ensure_database():
+    def ensure_database(force_retry=False):
         global _db_ready, _db_last_error, _db_last_attempt
 
         if _db_ready:
@@ -462,7 +464,7 @@ def create_app():
             now = time.monotonic()
             # Hatalı bir veritabanı yapılandırmasında her isteğin tekrar tekrar
             # DDL denemesine girmesini önle. 10 saniye sonra yeniden deneyebilir.
-            if _db_last_error and now - _db_last_attempt < 10:
+            if _db_last_error and not force_retry and now - _db_last_attempt < 10:
                 return False, _db_last_error
 
             _db_last_attempt = now
@@ -501,6 +503,8 @@ def create_app():
                 app.logger.info("Database schema is ready.")
                 return True, None
             except OperationalError as exc:
+                global _db_ready
+                _db_ready = False
                 db.session.rollback()
                 db.session.remove()
                 try:
@@ -524,7 +528,8 @@ def create_app():
         if request.path == "/healthz" or request.path.startswith("/static/"):
             return None
 
-        ready, error = ensure_database()
+        force_retry = bool(request.cookies.get("osp_db_retry"))
+        ready, error = ensure_database(force_retry=force_retry)
         if ready:
             return None
 
@@ -558,7 +563,7 @@ def create_app():
 
     @app.get("/readyz")
     def readyz():
-        ready, error = ensure_database()
+        ready, error = ensure_database(force_retry=True)
         if ready:
             return {"status": "ready", "database": "ok"}, 200
         return {"status": "not_ready", "database": "error", "message": error}, 503
