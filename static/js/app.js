@@ -182,7 +182,7 @@
       showLoader(form);
     });
 
-    /* Teacher project class selector — visual only. No network/database work here. */
+    /* Teacher project class selector — visual only. */
     const classPicker = document.querySelector("[data-class-picker]");
     if (classPicker) {
       const trigger = classPicker.querySelector("[data-class-trigger]");
@@ -194,19 +194,11 @@
       const scopeText = document.querySelector("[data-scope-text]");
       const scopeSubtext = document.querySelector("[data-scope-subtext]");
       const selectAll = classPicker.querySelector("[data-class-select-all]");
+      const layer = document.querySelector("[data-class-selection-layer]");
       const options = [...classPicker.querySelectorAll("[data-class-option]")];
-      const selectionLayer =
-        document.querySelector("[data-class-selection-layer]") || document.body;
 
-      const getSelected = () =>
+      const selectedOptions = () =>
         options.filter((option) => option.querySelector("input")?.checked === true);
-
-      const closeMenu = () => {
-        if (!menu) return;
-        menu.hidden = true;
-        classPicker.classList.remove("is-open");
-        trigger?.setAttribute("aria-expanded", "false");
-      };
 
       const openMenu = () => {
         if (!menu) return;
@@ -215,49 +207,46 @@
         trigger?.setAttribute("aria-expanded", "true");
       };
 
-      const updateText = () => {
-        const selected = getSelected();
+      const closeMenu = () => {
+        if (!menu) return;
+        menu.hidden = true;
+        classPicker.classList.remove("is-open");
+        trigger?.setAttribute("aria-expanded", "false");
+      };
+
+      const updateMeta = () => {
+        const selected = selectedOptions();
+        const namesText = selected.map((item) => item.dataset.className || "Sınıf");
 
         if (countLabel) {
-          countLabel.textContent = selected.length
-            ? selected.length + " sınıf seçildi"
-            : "0 sınıf seçildi";
+          countLabel.textContent = selected.length + " sınıf seçildi";
         }
-
         if (triggerTitle) {
           triggerTitle.textContent =
-            selected.length === 0
-              ? "Sınıf seçin"
-              : selected.length === 1
-                ? selected[0].dataset.className
-                : selected.length + " sınıf seçildi";
+            selected.length === 0 ? "Sınıf seçin" :
+            selected.length === 1 ? namesText[0] :
+            selected.length + " sınıf seçildi";
         }
-
         if (triggerSubtitle) {
-          triggerSubtitle.textContent = selected.length
-            ? selected.map((option) => option.dataset.className).join(" • ")
-            : "Birden fazla sınıf seçebilirsiniz";
+          triggerSubtitle.textContent =
+            selected.length ? namesText.join(" • ") : "Birden fazla sınıf seçebilirsiniz";
         }
-
         if (scopeText) {
           scopeText.textContent = selected.length
             ? selected.length + " SINIF İÇİN YAYIN"
             : "SINIF SEÇİMİ BEKLİYOR";
         }
-
         if (scopeSubtext) {
           scopeSubtext.textContent = selected.length
             ? "Seçilen sınıflardaki aktif öğrenciler projeyi görebilir."
             : "Projeyi yayınlamadan önce en az bir sınıf seçin.";
         }
-
         options.forEach((option) => {
           option.classList.toggle(
             "is-selected",
             option.querySelector("input")?.checked === true
           );
         });
-
         if (selectAll) {
           selectAll.textContent =
             selected.length === options.length && options.length
@@ -266,12 +255,14 @@
         }
       };
 
-      const renderClassNames = () => {
-        if (!names) return;
-        names.replaceChildren();
+      const renderNames = (animateClassId = "") => {
+        if (!names) return null;
 
-        getSelected().forEach((option, index) => {
-          if (index > 0) {
+        names.replaceChildren();
+        let arriving = null;
+
+        selectedOptions().forEach((option, index) => {
+          if (index) {
             const divider = document.createElement("span");
             divider.className = "selected-class-name-divider";
             divider.textContent = "·";
@@ -282,140 +273,145 @@
           label.className = "selected-class-name";
           label.dataset.classId = option.dataset.classId || "";
           label.textContent = option.dataset.className || "Sınıf";
+
+          if (animateClassId && label.dataset.classId === animateClassId) {
+            label.classList.add("is-arriving");
+            arriving = label;
+          }
+
           names.appendChild(label);
         });
+
+        return arriving;
       };
 
-      const refreshVisualState = () => {
-        updateText();
-        renderClassNames();
-      };
+      const spawnSphere = (originElement, targetElement) => {
+        if (!layer || !originElement || !targetElement) return;
 
-      const createSphere = (sourceRect) => {
+        const origin = originElement.getBoundingClientRect();
+        const target = targetElement.getBoundingClientRect();
+
+        const ox = Math.round(origin.left + origin.width / 2);
+        const oy = Math.round(origin.top + origin.height / 2);
+        const tx = Math.round(target.left + target.width / 2);
+        const ty = Math.round(target.top + target.height / 2);
+
         const sphere = document.createElement("span");
         sphere.className = "class-selection-sphere";
         sphere.setAttribute("aria-hidden", "true");
-        selectionLayer.appendChild(sphere);
+        layer.appendChild(sphere);
+
+        // Paint the sphere once at its source before starting the movement.
         void sphere.offsetWidth;
 
-        return {
-          sphere,
-          sourceX: Math.round(sourceRect.left + sourceRect.width / 2 - 18),
-          sourceY: Math.round(sourceRect.top + sourceRect.height / 2 - 18)
-        };
-      };
-
-      const animateSphere = (sourceRect, destinationRect, onFinish) => {
-        const { sphere, sourceX, sourceY } = createSphere(sourceRect);
-
-        const destX = Math.round(destinationRect.left + destinationRect.width / 2 - 18);
-        const destY = Math.round(destinationRect.top + destinationRect.height / 2 - 18);
-
-        const dx = destX - sourceX;
-        const dy = destY - sourceY;
-
-        const keyframes = [
-          {
-            transform: `translate3d(${sourceX}px,${sourceY}px,0) scale(1)`,
-            opacity: 1,
-            filter: "blur(0)"
-          },
-          {
-            transform: `translate3d(${sourceX}px,${sourceY - 22}px,0) scale(1.12)`,
-            opacity: 1,
-            filter: "blur(0)"
-          },
-          {
-            transform: `translate3d(${sourceX + Math.round(dx * .12)}px,${sourceY - 76}px,0) scale(1)`,
-            opacity: 1,
-            filter: "blur(0)"
-          },
-          {
-            transform: `translate3d(${sourceX + Math.round(dx * .38)}px,${sourceY + Math.round(dy * .18) - 58}px,0) scale(.86)`,
-            opacity: .98,
-            filter: "blur(0)"
-          },
-          {
-            transform: `translate3d(${sourceX + Math.round(dx * .72)}px,${sourceY + Math.round(dy * .68) - 26}px,0) scale(.58)`,
-            opacity: .82,
-            filter: "blur(.1px)"
-          },
-          {
-            transform: `translate3d(${destX}px,${destY}px,0) scale(.16)`,
-            opacity: .05,
-            filter: "blur(.45px)"
-          }
-        ];
-
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          try { animation?.cancel(); } catch (_) {}
-          sphere.remove();
-          onFinish?.();
-        };
+        const startX = ox - 18;
+        const startY = oy - 18;
+        const endX = tx - 18;
+        const endY = ty - 18;
+        const midX = startX + Math.round((endX - startX) * 0.44);
+        const dx = endX - startX;
+        const dy = endY - startY;
 
         let animation;
+        let done = false;
+
+        const cleanup = () => {
+          if (done) return;
+          done = true;
+          try { animation?.cancel(); } catch (_) {}
+          sphere.remove();
+          targetElement.classList.remove("is-arriving", "is-settling");
+        };
+
         try {
-          animation = sphere.animate(keyframes, {
-            duration: 900,
-            easing: "cubic-bezier(.12,.82,.22,1)",
-            fill: "forwards"
-          });
-          animation.addEventListener("finish", finish, { once: true });
+          animation = sphere.animate(
+            [
+              {
+                transform: `translate3d(${startX}px,${startY}px,0) scale(1)`,
+                opacity: 1
+              },
+              {
+                transform: `translate3d(${startX}px,${startY - 26}px,0) scale(1.16)`,
+                opacity: 1
+              },
+              {
+                transform: `translate3d(${startX + Math.round(dx * .10)}px,${startY - 72}px,0) scale(1.02)`,
+                opacity: 1
+              },
+              {
+                transform: `translate3d(${midX}px,${startY + Math.round(dy * .22) - 66}px,0) scale(.82)`,
+                opacity: 1
+              },
+              {
+                transform: `translate3d(${startX + Math.round(dx * .76)}px,${startY + Math.round(dy * .72) - 30}px,0) scale(.52)`,
+                opacity: .86
+              },
+              {
+                transform: `translate3d(${endX}px,${endY}px,0) scale(.12)`,
+                opacity: .05
+              }
+            ],
+            {
+              duration: 980,
+              easing: "cubic-bezier(.16,.86,.22,1)",
+              fill: "forwards"
+            }
+          );
+
+          animation.addEventListener("finish", () => {
+            targetElement.classList.remove("is-arriving");
+            targetElement.classList.add("is-settling");
+            window.setTimeout(() => targetElement.classList.remove("is-settling"), 360);
+            cleanup();
+          }, { once: true });
         } catch (_) {
-          // Browser fallback: keep the sphere visible briefly rather than silently failing.
-          window.setTimeout(finish, 900);
+          window.setTimeout(cleanup, 980);
         }
 
-        window.setTimeout(finish, 1050);
+        window.setTimeout(cleanup, 1200);
       };
 
-      const selectOption = (option) => {
+      const selectClass = (option) => {
         const input = option.querySelector("input");
         if (!input || input.checked) return;
 
-        const sourceElement = option.querySelector(".class-option-check") || option;
-        const sourceRect = sourceElement.getBoundingClientRect();
+        const origin = option.querySelector(".class-option-check") || option;
 
-        // 1) Menu closes immediately.
+        // Close before touching the visual target.
         closeMenu();
 
-        // 2) Selection changes locally.
         input.checked = true;
-        option.classList.add("is-selected");
+        updateMeta();
+        const target = renderNames(option.dataset.classId || "");
 
-        // 3) Create only the final plain text label. No pill/bead visuals.
-        refreshVisualState();
-
-        const target = names?.lastElementChild;
         if (!target) return;
 
-        // Reserve the target's final space before measuring the flight destination.
-        target.classList.add("selected-class-name-arriving");
-        const destinationRect = target.getBoundingClientRect();
-
-        // Hide only the final text while the real sphere is travelling.
-        target.classList.add("selected-class-name-hidden");
-
+        // The target is created first, but remains transparent while the sphere flies.
         requestAnimationFrame(() => {
-          animateSphere(sourceRect, destinationRect, () => {
-            target.classList.remove("selected-class-name-hidden");
-            target.classList.add("selected-class-name-settle");
-            window.setTimeout(
-              () => target.classList.remove("selected-class-name-settle"),
-              440
-            );
+          const targetRect = target.getBoundingClientRect();
+          target.classList.add("is-arriving");
+
+          // A second frame guarantees the transparent destination has its final layout.
+          requestAnimationFrame(() => {
+            spawnSphere(origin, {
+              getBoundingClientRect: () => targetRect
+            });
+
+            window.setTimeout(() => {
+              target.classList.remove("is-arriving");
+              target.classList.add("is-settling");
+              window.setTimeout(() => target.classList.remove("is-settling"), 360);
+            }, 1000);
           });
         });
       };
 
-      const unselectOption = (option) => {
+      const unselectClass = (option) => {
         const input = option.querySelector("input");
         if (!input || !input.checked) return;
         input.checked = false;
-        refreshVisualState();
+        updateMeta();
+        renderNames();
       };
 
       trigger?.addEventListener("click", (event) => {
@@ -429,21 +425,19 @@
 
         option.addEventListener("click", (event) => {
           event.preventDefault();
-          if (input?.checked) unselectOption(option);
-          else selectOption(option);
+          if (input?.checked) unselectClass(option);
+          else selectClass(option);
         });
 
         input?.addEventListener("change", (event) => {
-          event.preventDefault();
           event.stopPropagation();
-          if (input.checked) selectOption(option);
-          else unselectOption(option);
+          if (input.checked) selectClass(option);
+          else unselectClass(option);
         });
       });
 
       selectAll?.addEventListener("click", (event) => {
         event.preventDefault();
-
         const allSelected =
           options.length > 0 &&
           options.every((option) => option.querySelector("input")?.checked === true);
@@ -453,7 +447,8 @@
           if (input) input.checked = !allSelected;
         });
 
-        refreshVisualState();
+        updateMeta();
+        renderNames();
         closeMenu();
       });
 
@@ -465,7 +460,8 @@
         if (event.key === "Escape") closeMenu();
       });
 
-      refreshVisualState();
+      updateMeta();
+      renderNames();
     }
 
     hideLoader();
