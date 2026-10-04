@@ -7,7 +7,9 @@
 
   <section class="login-content">
     <header class="login-brand">
-      <div class="brand-mark">OSP</div>
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="brand-svg"><path d="M4 8.2 12 4l8 4.2-8 4.2L4 8.2Z"/><path d="M7 10.1V15c0 1.9 2.2 3.5 5 3.5s5-1.6 5-3.5v-4.9"/><path d="M20 8.2v5.4"/></svg>
+      </div>
       <div>
         <span>OKUL SINAV</span>
         <strong>PROJE</strong>
@@ -24,15 +26,17 @@
       <article class="login-card teacher-card">
         <div class="card-accent"></div>
         <div class="login-card-head">
-          <span class="login-icon">T</span>
+          <span class="login-icon icon-teacher" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="ui-svg"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 19.5c.7-3.2 2.8-5 6.5-5s5.8 1.8 6.5 5"/></svg>
+          </span>
           <div><span>ÖĞRETMEN</span><strong>Öğretmen girişi</strong></div>
         </div>
         <p>Projelerinizi oluşturun, sınıflara yayınlayın ve teslimleri takip edin.</p>
         <form class="card-form" method="post" action="{{ url_for('login') }}">
           <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
           <input type="hidden" name="role" value="teacher">
-          <label><span>Kullanıcı adı</span><input name="username" autocomplete="username" required></label>
-          <label><span>Şifre</span><input name="password" type="password" autocomplete="current-password" required></label>
+          <label><span>Kullanıcı adı</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg><input name="username" autocomplete="username" required></div></label>
+          <label><span>Şifre</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input name="password" type="password" autocomplete="current-password" required></div></label>
           <button class="login-submit teacher-submit" type="submit">Giriş yap <b>→</b></button>
         </form>
       </article>
@@ -40,22 +44,25 @@
       <article class="login-card student-card">
         <div class="card-accent"></div>
         <div class="login-card-head">
-          <span class="login-icon">Ö</span>
+          <span class="login-icon icon-student" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="ui-svg"><path d="m3.5 9.2 8.5-4 8.5 4-8.5 4-8.5-4Z"/><path d="M7 11.2v4.2c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.2"/></svg>
+          </span>
           <div><span>ÖĞRENCİ</span><strong>Öğrenci girişi</strong></div>
         </div>
         <p>Sınıfınıza açılan projeleri görün, dosyanızı teslim edin ve durumunuzu takip edin.</p>
         <form class="card-form" method="post" action="{{ url_for('login') }}">
           <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
           <input type="hidden" name="role" value="student">
-          <label><span>Kullanıcı adı</span><input name="username" autocomplete="username" required></label>
-          <label><span>Şifre</span><input name="password" type="password" autocomplete="current-password" required></label>
+          <label><span>Kullanıcı adı</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg><input name="username" autocomplete="username" required></div></label>
+          <label><span>Şifre</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input name="password" type="password" autocomplete="current-password" required></div></label>
           <button class="login-submit student-submit" type="submit">Giriş yap <b>→</b></button>
         </form>
       </article>
     </section>
 
     <a class="chief-access" href="{{ url_for('login') }}?role=chief">
-      <span>ALAN ŞEFİ</span>
+      <span class="chief-access-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="ui-svg"><path d="M12 3.5 19 6v5.7c0 4.6-2.9 7.2-7 8.8-4.1-1.6-7-4.2-7-8.8V6l7-2.5Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg></span>
+      <span class="chief-access-label">ALAN ŞEFİ</span>
       <strong>Yönetim erişimi <b>→</b></strong>
     </a>
 
