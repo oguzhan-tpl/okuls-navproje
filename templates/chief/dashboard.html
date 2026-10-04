@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Alan Şefi · Genel Bakış{% endblock %}
+{% block kicker %}ALAN ŞEFİ PANELİ{% endblock %}
+{% block heading %}Genel bakış{% endblock %}
+{% block content %}
+<section class="metric-grid chief-metrics">
+  <div class="metric"><span>ÖĞRENCİ</span><strong>{{ stats.students }}</strong><small>Sistem hesabı</small></div>
+  <div class="metric"><span>ÖĞRETMEN</span><strong>{{ stats.teachers }}</strong><small>Proje oluşturabilir</small></div>
+  <div class="metric"><span>AKTİF SINIF</span><strong>{{ stats.classes }}</strong><small>Projelerde kullanılabilir</small></div>
+  <div class="metric"><span>PROJE</span><strong>{{ stats.projects }}</strong><small>Arşiv dışı</small></div>
+  <div class="metric"><span>TESLİM</span><strong>{{ stats.submissions }}</strong><small>Toplam gönderi</small></div>
+</section>
+<section class="quick-grid">
+  <a class="quick-card" href="{{ url_for('chief_users') }}"><span>01</span><div><strong>Hesaplar</strong><small>Öğretmen ve öğrenci hesabı yönetimi.</small></div><b>→</b></a>
+  <a class="quick-card" href="{{ url_for('chief_classes') }}"><span>02</span><div><strong>Sınıflar</strong><small>Sınıf ve şube yapısını yönet.</small></div><b>→</b></a>
+  <a class="quick-card" href="{{ url_for('chief_projects') }}"><span>03</span><div><strong>Projeler</strong><small>Sistemdeki bütün projeleri izle.</small></div><b>→</b></a>
+</section>
+<section class="section-block">
+  <div class="section-head"><div><span class="section-kicker">SON PROJELER</span><h2>Sistem hareketleri</h2></div></div>
+  {% if recent_projects %}
+  <div class="project-table">
+    {% for project in recent_projects %}
+    <div class="project-row static-row">
+      <div class="project-index">{{ loop.index|string|length }}</div>
+      <div class="project-main"><strong>{{ project.title }}</strong><span>{{ project.teacher.full_name }} · {{ project.classes|map(attribute='name')|join(', ') }}</span></div>
+      <div class="project-stat"><small>DURUM</small><strong>{{ 'Yayında' if project.published else 'Taslak' }}</strong></div>
+      <div class="project-stat"><small>TARİH</small><strong>{{ project.created_at|dt }}</strong></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="empty-state"><h3>Henüz proje oluşturulmadı.</h3></div>{% endif %}
+</section>
+{% endblock %}
