@@ -239,17 +239,63 @@
         else closeMenu();
       });
 
+      const flyChipToHeader = (option) => {
+        if (!pills) return;
+        const source = option.getBoundingClientRect();
+        const targetBox = pills.getBoundingClientRect();
+        const target = targetBox.width
+          ? {
+              x: targetBox.left + Math.min(targetBox.width - 30, 18),
+              y: targetBox.top + targetBox.height / 2,
+            }
+          : {
+              x: classPicker.getBoundingClientRect().left + 160,
+              y: classPicker.getBoundingClientRect().top - 20,
+            };
+
+        const flight = document.createElement("span");
+        flight.className = "class-chip-flight";
+        flight.textContent = option.dataset.className || "Sınıf";
+        flight.style.left = (source.left + source.width / 2 - 35) + "px";
+        flight.style.top = (source.top + source.height / 2 - 14) + "px";
+        document.body.appendChild(flight);
+
+        requestAnimationFrame(() => {
+          flight.style.setProperty("--fly-x", (target.x - source.left - source.width / 2) + "px");
+          flight.style.setProperty("--fly-y", (target.y - source.top - source.height / 2) + "px");
+          flight.classList.add("is-flying");
+        });
+
+        window.setTimeout(() => flight.remove(), 520);
+      };
+
+      const toggleOption = (option, shouldClose) => {
+        const input = option.querySelector("input");
+        if (!input) return;
+        input.checked = !input.checked;
+        renderSelected(true, input.checked ? option : null);
+
+        if (input.checked) {
+          flyChipToHeader(option);
+          if (shouldClose) {
+            window.setTimeout(closeMenu, 160);
+          }
+        }
+      };
+
       options.forEach((option) => {
         option.addEventListener("click", (event) => {
           if (event.target.closest("input")) return;
-          const input = option.querySelector("input");
-          if (!input) return;
-          input.checked = !input.checked;
-          renderSelected(true, option);
+          event.preventDefault();
+          toggleOption(option, true);
         });
 
         option.querySelector("input")?.addEventListener("change", () => {
           renderSelected(true, option);
+          if (option.querySelector("input")?.checked) {
+            flyChipToHeader(option);
+            window.setTimeout(closeMenu, 160);
+          }
         });
       });
 
