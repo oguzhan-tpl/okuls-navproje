@@ -803,6 +803,10 @@ def create_app():
             flash("Arşivlenmiş proje yeniden yayınlanamaz.", "error")
             return redirect(url_for("teacher_project_detail", project_id=project.id))
 
+        if not project.published and not project.classes:
+            flash("Projeyi yayınlamak için en az bir sınıf seçmelisiniz.", "error")
+            return redirect(url_for("teacher_project_detail", project_id=project.id))
+
         project.published = not project.published
         project.updated_at = utc_now()
         db.session.commit()
@@ -866,9 +870,19 @@ def create_app():
         user = get_current_user()
         active_projects = (
             Project.query
+            .outerjoin(
+                project_class_link,
+                project_class_link.c.project_id == Project.id,
+            )
             .filter(
                 Project.published.is_(True),
                 Project.archived.is_(False),
+            )
+            .filter(
+                db.or_(
+                    project_class_link.c.class_id == user.class_id,
+                    project_class_link.c.project_id.is_(None),
+                )
             )
             .order_by(
                 Project.deadline.is_(None),
@@ -896,6 +910,10 @@ def create_app():
             not project
             or not project.published
             or project.archived
+            or (
+                project.classes
+                and user.class_id not in {classroom.id for classroom in project.classes}
+            )
         ):
             abort(404)
         submission = db.session.scalar(
@@ -922,7 +940,10 @@ def create_app():
             not project
             or not project.published
             or project.archived
-            or user.class_id not in {c.id for c in project.classes}
+            or (
+                project.classes
+                and user.class_id not in {classroom.id for classroom in project.classes}
+            )
         ):
             abort(404)
 
