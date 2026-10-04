@@ -1,0 +1,31 @@
+name: quality
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q app.py
+      - name: Parse Jinja templates
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from jinja2 import Environment, TemplateSyntaxError
+
+          env = Environment()
+          for path in sorted(Path("templates").rglob("*.html")):
+              try:
+                  env.parse(path.read_text(encoding="utf-8"))
+              except TemplateSyntaxError as exc:
+                  raise SystemExit(f"{path}: {exc}") from exc
+              print(f"OK {path}")
+          PY
