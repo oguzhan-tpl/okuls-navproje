@@ -1,7 +1,8 @@
 import hashlib
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from functools import wraps
 from io import BytesIO
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -22,6 +23,7 @@ from werkzeug.utils import secure_filename
 db = SQLAlchemy()
 
 ROLES = {"chief", "teacher", "student"}
+APP_TIMEZONE = ZoneInfo(os.getenv("APP_TIMEZONE", "Europe/Istanbul"))
 
 ALLOWED_EXTENSIONS = {
     "7z", "c", "cpp", "css", "csv", "doc", "docx", "gif", "html",
@@ -228,6 +230,21 @@ def normalize_db_url(value: str) -> str:
     )
 
 
+def utc_now():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def parse_local_datetime(value: str):
+    local_value = datetime.strptime(value, "%Y-%m-%dT%H:%M").replace(tzinfo=APP_TIMEZONE)
+    return local_value.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def display_local_datetime(value):
+    if value is None:
+        return None
+    return value.replace(tzinfo=timezone.utc).astimezone(APP_TIMEZONE)
+
+
 def create_app():
     app = Flask(__name__)
     app.config.update(
@@ -257,7 +274,7 @@ def create_app():
     def format_datetime(value):
         if not value:
             return "—"
-        return value.strftime("%d.%m.%Y %H:%M")
+        return display_local_datetime(value).strftime("%d.%m.%Y %H:%M")
 
     @app.template_filter("filesize")
     def format_filesize(value):
@@ -415,7 +432,7 @@ def create_app():
             session["user_id"] = user.id
             session["_csrf"] = secrets.token_urlsafe(32)
             session.permanent = True
-            user.last_login_at = datetime.utcnow()
+            user.last_login_at = utc_now()
             db.session.commit()
 
             target = {
@@ -515,7 +532,7 @@ def create_app():
             deadline = None
             if deadline_raw:
                 try:
-                    deadline = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
+                    deadline = parse_local_datetime(deadline_raw)
                 except ValueError:
                     flash("Teslim tarihi biçimi geçersiz.", "error")
                     return render_template(
@@ -524,7 +541,7 @@ def create_app():
                         form=request.form,
                     )
 
-            if deadline and deadline < datetime.utcnow():
+            if deadline and deadline < utc_now():
                 flash("Teslim tarihi geçmişte olamaz.", "error")
                 return render_template(
                     "teacher/project_form.html",
@@ -614,7 +631,7 @@ def create_app():
             return redirect(url_for("teacher_project_detail", project_id=project.id))
 
         project.published = not project.published
-        project.updated_at = datetime.utcnow()
+        project.updated_at = utc_now()
         db.session.commit()
         flash("Proje durumu güncellendi.", "success")
         return redirect(url_for("teacher_project_detail", project_id=project.id))
@@ -629,7 +646,7 @@ def create_app():
 
         project.archived = True
         project.published = False
-        project.updated_at = datetime.utcnow()
+        project.updated_at = utc_now()
         db.session.commit()
         flash("Proje arşive alındı.", "success")
         return redirect(url_for("teacher_dashboard"))
@@ -650,7 +667,7 @@ def create_app():
             status = "pending"
         submission.review_status = status
         submission.teacher_note = request.form.get("teacher_note", "").strip() or None
-        submission.updated_at = datetime.utcnow()
+        submission.updated_at = utc_now()
         db.session.commit()
         flash("Teslim bilgisi güncellendi.", "success")
         return redirect(
@@ -720,7 +737,7 @@ def create_app():
             "student/project_detail.html",
             project=project,
             submission=submission,
-            locked=bool(project.deadline and datetime.utcnow() > project.deadline),
+            locked=bool(project.deadline and utc_now() > project.deadline),
         )
 
     @app.post("/student/projects/<int:project_id>/submit")
@@ -773,7 +790,7 @@ def create_app():
                 Submission.student_id == user.id,
             )
         )
-        now = datetime.utcnow()
+        now = utc_now()
         if submission:
             submission.original_filename = upload.filename[:255]
             submission.stored_filename = safe_name[:255]
