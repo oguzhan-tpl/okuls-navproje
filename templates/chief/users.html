@@ -7,7 +7,7 @@
 <div class="section-block"><div class="section-head"><div><span class="section-kicker">YENİ HESAP</span><h2>Hesap oluştur</h2></div></div>
 <form class="form-stack compact-form" method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
 <div class="role-segment"><label><input type="radio" name="role" value="teacher" checked><span>Öğretmen</span></label><label><input type="radio" name="role" value="student"><span>Öğrenci</span></label></div>
-<div class="role-info"><strong>Atama mantığı</strong>Öğretmenler sınıfa bağlanmaz. Öğrenci hesaplarında sınıf seçilir; yayınlanan her öğretmen projesi tüm aktif öğrencilere açılır.</div>
+<div class="role-info"><strong>Atama mantığı</strong>Öğretmenler sınıfa bağlanmaz. Öğrenci hesaplarında sınıf seçilir; yayınlanan her öğretmen projesi seçilen sınıflara açılır.</div>
 <label class="field"><span>Ad soyad</span><input name="full_name" required></label><label class="field"><span>Kullanıcı adı</span><input name="username" required></label><label class="field"><span>Geçici şifre</span><input name="password" type="password" minlength="8" required></label>
 <label class="field student-only"><span>Öğrenci numarası</span><input name="student_no"></label>
 <label class="field student-only"><span>Öğrencinin sınıfı</span><select name="class_id"><option value="">Sınıf seçin</option>{% for classroom in classrooms %}<option value="{{ classroom.id }}">{{ classroom.name }}</option>{% endfor %}</select></label>
