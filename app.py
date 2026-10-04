@@ -216,6 +216,19 @@ def normalize_db_url(value: str) -> str:
         value = "mysql+pymysql://" + value[len("mysql://"):]
 
     parts = urlsplit(value)
+    configured_db = (os.getenv("DB_NAME", "test") or "test").strip().strip("/")
+    system_databases = {"information_schema", "mysql", "performance_schema", "sys"}
+
+    # TiDB'nin system şemalarına uygulama tabloları kurulamaz. Eski
+    # bağlantılarda /sys kullanılmışsa otomatik olarak uygulama veritabanına
+    # geçiriyoruz; özel bir veritabanı verilmişse ona dokunmuyoruz.
+    database_name = parts.path.strip("/")
+    if not database_name or database_name.lower() in system_databases:
+        if configured_db.lower() in system_databases:
+            configured_db = "test"
+        database_name = configured_db
+        parts = parts._replace(path=f"/{database_name}")
+
     query = dict(parse_qsl(parts.query, keep_blank_values=True))
     query.setdefault("ssl_verify_cert", "true")
     query.setdefault("ssl_verify_identity", "true")
