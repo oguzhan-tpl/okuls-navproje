@@ -137,6 +137,144 @@
       showLoader(form);
     });
 
+    /* Animated class selector for teacher project publishing. */
+    const classPicker = document.querySelector("[data-class-picker]");
+    if (classPicker) {
+      const trigger = classPicker.querySelector("[data-class-trigger]");
+      const menu = classPicker.querySelector("[data-class-menu]");
+      const countLabel = classPicker.querySelector("[data-class-count]");
+      const pills = classPicker.querySelector("[data-selected-pills]");
+      const triggerTitle = classPicker.querySelector("[data-class-trigger-title]");
+      const triggerSubtitle = classPicker.querySelector("[data-class-trigger-subtitle]");
+      const scopeText = document.querySelector("[data-scope-text]");
+      const scopeSubtext = document.querySelector("[data-scope-subtext]");
+      const selectAll = classPicker.querySelector("[data-class-select-all]");
+      const options = [...classPicker.querySelectorAll("[data-class-option]")];
+
+      const renderSelected = (animate = false, changedOption = null) => {
+        const selected = options.filter((option) =>
+          option.querySelector("input")?.checked
+        );
+
+        if (countLabel) {
+          countLabel.textContent = selected.length
+            ? selected.length + " sınıf seçildi"
+            : "0 sınıf seçildi";
+        }
+
+        if (triggerTitle) {
+          triggerTitle.textContent =
+            selected.length === 0
+              ? "Sınıf seçin"
+              : selected.length === 1
+                ? selected[0].dataset.className
+                : selected.length + " sınıf seçildi";
+        }
+
+        if (triggerSubtitle) {
+          triggerSubtitle.textContent = selected.length
+            ? selected.map((option) => option.dataset.className).join(" • ")
+            : "Birden fazla sınıf seçebilirsiniz";
+        }
+
+        if (scopeText) {
+          scopeText.textContent = selected.length
+            ? selected.length + " SINIF İÇİN YAYIN"
+            : "SINIF SEÇİMİ BEKLİYOR";
+        }
+
+        if (scopeSubtext) {
+          scopeSubtext.textContent = selected.length
+            ? "Seçilen sınıflardaki aktif öğrenciler projeyi görebilir."
+            : "Projeyi yayınlamadan önce en az bir sınıf seçin.";
+        }
+
+        if (pills) {
+          pills.innerHTML = "";
+          selected.forEach((option, index) => {
+            const pill = document.createElement("span");
+            pill.className = "selected-class-pill";
+            pill.innerHTML =
+              '<span class="selected-class-dot"></span>' +
+              '<strong></strong>';
+            pill.querySelector("strong").textContent = option.dataset.className;
+
+            if (animate && (changedOption === option || index === selected.length - 1)) {
+              pill.classList.add("pill-enter");
+            }
+            pills.appendChild(pill);
+          });
+        }
+
+        options.forEach((option) => {
+          option.classList.toggle(
+            "is-selected",
+            option.querySelector("input")?.checked === true
+          );
+        });
+
+        if (selectAll) {
+          selectAll.textContent =
+            selected.length === options.length && options.length
+              ? "Seçimi kaldır"
+              : "Tümünü seç";
+        }
+      };
+
+      const closeMenu = () => {
+        menu.hidden = true;
+        classPicker.classList.remove("is-open");
+        trigger?.setAttribute("aria-expanded", "false");
+      };
+
+      const openMenu = () => {
+        menu.hidden = false;
+        classPicker.classList.add("is-open");
+        trigger?.setAttribute("aria-expanded", "true");
+      };
+
+      trigger?.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (menu.hidden) openMenu();
+        else closeMenu();
+      });
+
+      options.forEach((option) => {
+        option.addEventListener("click", (event) => {
+          if (event.target.closest("input")) return;
+          const input = option.querySelector("input");
+          if (!input) return;
+          input.checked = !input.checked;
+          renderSelected(true, option);
+        });
+
+        option.querySelector("input")?.addEventListener("change", () => {
+          renderSelected(true, option);
+        });
+      });
+
+      selectAll?.addEventListener("click", (event) => {
+        event.preventDefault();
+        const allSelected = options.length > 0 &&
+          options.every((option) => option.querySelector("input")?.checked);
+        options.forEach((option) => {
+          const input = option.querySelector("input");
+          if (input) input.checked = !allSelected;
+        });
+        renderSelected(true, null);
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!classPicker.contains(event.target)) closeMenu();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenu();
+      });
+
+      renderSelected(false);
+    }
+
     hideLoader();
   });
 
