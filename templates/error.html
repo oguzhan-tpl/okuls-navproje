@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <title>{{ code }} · Okul Sınav Proje</title>
+</head>
+<body class="error-body">
+  <div class="error-box">
+    <span class="eyebrow">OSP / {{ code }}</span>
+    <h1>{{ message }}</h1>
+    <p>İşlem tamamlanamadı. Ana sayfaya dönerek tekrar deneyebilirsiniz.</p>
+    <a class="button button-dark" href="{{ url_for('home') }}">Ana sayfaya dön →</a>
+  </div>
+</body>
+</html>
