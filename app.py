@@ -97,6 +97,13 @@ class User(db.Model):
     )
 
 
+project_class_link = db.Table(
+    "osp_project_classes",
+    db.Column("project_id", db.Integer, db.ForeignKey("osp_projects.id", ondelete="CASCADE"), primary_key=True),
+    db.Column("class_id", db.Integer, db.ForeignKey("osp_classrooms.id", ondelete="CASCADE"), primary_key=True),
+)
+
+
 class Project(db.Model):
     __tablename__ = "osp_projects"
 
@@ -120,6 +127,13 @@ class Project(db.Model):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
+    )
+
+    classes = db.relationship(
+        "Classroom",
+        secondary=project_class_link,
+        lazy="selectin",
+        order_by="Classroom.grade, Classroom.section",
     )
 
     teacher = db.relationship(
