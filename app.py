@@ -448,7 +448,7 @@ def create_app():
     def ensure_database_for_application_requests():
         # Render'ın health check'i yalnızca process/HTTP canlılığını ölçsün.
         # Veritabanı DDL'si yüzünden deploy'un kilitlenmesini istemiyoruz.
-        if request.path == "/healthz":
+        if request.path == "/healthz" or request.path.startswith("/static/"):
             return None
 
         ready, error = ensure_database()
