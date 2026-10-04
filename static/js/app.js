@@ -182,19 +182,21 @@
       showLoader(form);
     });
 
-    /* Teacher project class selector — close first, then launch the sphere. */
+    /* Teacher project class selector — visual only. No network/database work here. */
     const classPicker = document.querySelector("[data-class-picker]");
     if (classPicker) {
       const trigger = classPicker.querySelector("[data-class-trigger]");
       const menu = classPicker.querySelector("[data-class-menu]");
       const countLabel = classPicker.querySelector("[data-class-count]");
-      const pills = classPicker.querySelector("[data-selected-pills]");
+      const names = classPicker.querySelector("[data-selected-pills]");
       const triggerTitle = classPicker.querySelector("[data-class-trigger-title]");
       const triggerSubtitle = classPicker.querySelector("[data-class-trigger-subtitle]");
       const scopeText = document.querySelector("[data-scope-text]");
       const scopeSubtext = document.querySelector("[data-scope-subtext]");
       const selectAll = classPicker.querySelector("[data-class-select-all]");
       const options = [...classPicker.querySelectorAll("[data-class-option]")];
+      const selectionLayer =
+        document.querySelector("[data-class-selection-layer]") || document.body;
 
       const getSelected = () =>
         options.filter((option) => option.querySelector("input")?.checked === true);
@@ -213,7 +215,7 @@
         trigger?.setAttribute("aria-expanded", "true");
       };
 
-      const renderSelected = () => {
+      const updateText = () => {
         const selected = getSelected();
 
         if (countLabel) {
@@ -249,21 +251,6 @@
             : "Projeyi yayınlamadan önce en az bir sınıf seçin.";
         }
 
-        if (pills) {
-          pills.replaceChildren();
-
-          selected.forEach((option) => {
-            const pill = document.createElement("span");
-            pill.className = "selected-class-pill";
-            pill.dataset.classId = option.dataset.classId || "";
-            pill.innerHTML =
-              '<span class="selected-class-dot"></span>' +
-              '<strong></strong>';
-            pill.querySelector("strong").textContent = option.dataset.className || "Sınıf";
-            pills.appendChild(pill);
-          });
-        }
-
         options.forEach((option) => {
           option.classList.toggle(
             "is-selected",
@@ -279,93 +266,110 @@
         }
       };
 
-      const addDestinationPill = (option) => {
-        if (!pills) return null;
+      const renderClassNames = () => {
+        if (!names) return;
+        names.replaceChildren();
 
-        const pill = document.createElement("span");
-        pill.className = "selected-class-pill is-arriving";
-        pill.dataset.classId = option.dataset.classId || "";
-        pill.innerHTML =
-          '<span class="selected-class-dot"></span>' +
-          '<strong></strong>';
-        pill.querySelector("strong").textContent = option.dataset.className || "Sınıf";
+        getSelected().forEach((option, index) => {
+          if (index > 0) {
+            const divider = document.createElement("span");
+            divider.className = "selected-class-name-divider";
+            divider.textContent = "·";
+            names.appendChild(divider);
+          }
 
-        pills.appendChild(pill);
-        return pill;
+          const label = document.createElement("span");
+          label.className = "selected-class-name";
+          label.dataset.classId = option.dataset.classId || "";
+          label.textContent = option.dataset.className || "Sınıf";
+          names.appendChild(label);
+        });
       };
 
-      const launchSelectionSphere = (sourceRect, targetElement, onFinish) => {
-        if (!targetElement) {
-          onFinish?.();
-          return;
-        }
+      const refreshVisualState = () => {
+        updateText();
+        renderClassNames();
+      };
 
-        const targetRect = targetElement.getBoundingClientRect();
-        const sx = Math.round(sourceRect.left + sourceRect.width / 2 - 17);
-        const sy = Math.round(sourceRect.top + sourceRect.height / 2 - 17);
-        const tx = Math.round(targetRect.left + targetRect.width / 2 - 17);
-        const ty = Math.round(targetRect.top + targetRect.height / 2 - 17);
-
-        const dx = tx - sx;
-        const dy = ty - sy;
-
+      const createSphere = (sourceRect) => {
         const sphere = document.createElement("span");
         sphere.className = "class-selection-sphere";
         sphere.setAttribute("aria-hidden", "true");
-        document.body.appendChild(sphere);
+        selectionLayer.appendChild(sphere);
+        void sphere.offsetWidth;
 
-        // No element.style writes: the site's strict CSP stays intact.
-        // Coordinates are carried entirely by Web Animations keyframes.
-        const animation = sphere.animate(
-          [
-            {
-              transform: `translate3d(${sx}px,${sy}px,0) scale(1)`,
-              opacity: 1,
-              filter: "blur(0)"
-            },
-            {
-              transform: `translate3d(${sx}px,${sy - 24}px,0) scale(1.08)`,
-              opacity: 1,
-              filter: "blur(0)"
-            },
-            {
-              transform: `translate3d(${sx + Math.round(dx * 0.08)}px,${sy - 62}px,0) scale(.98)`,
-              opacity: 1,
-              filter: "blur(0)"
-            },
-            {
-              transform: `translate3d(${sx + Math.round(dx * 0.32)}px,${sy - 54}px,0) scale(.86)`,
-              opacity: .98,
-              filter: "blur(0)"
-            },
-            {
-              transform: `translate3d(${sx + Math.round(dx * 0.66)}px,${sy + Math.round(dy * 0.62) - 28}px,0) scale(.58)`,
-              opacity: .86,
-              filter: "blur(.1px)"
-            },
-            {
-              transform: `translate3d(${tx}px,${ty}px,0) scale(.20)`,
-              opacity: .10,
-              filter: "blur(.35px)"
-            }
-          ],
+        return {
+          sphere,
+          sourceX: Math.round(sourceRect.left + sourceRect.width / 2 - 18),
+          sourceY: Math.round(sourceRect.top + sourceRect.height / 2 - 18)
+        };
+      };
+
+      const animateSphere = (sourceRect, destinationRect, onFinish) => {
+        const { sphere, sourceX, sourceY } = createSphere(sourceRect);
+
+        const destX = Math.round(destinationRect.left + destinationRect.width / 2 - 18);
+        const destY = Math.round(destinationRect.top + destinationRect.height / 2 - 18);
+
+        const dx = destX - sourceX;
+        const dy = destY - sourceY;
+
+        const keyframes = [
           {
-            duration: 820,
-            easing: "cubic-bezier(.12,.82,.22,1)",
-            fill: "forwards"
+            transform: `translate3d(${sourceX}px,${sourceY}px,0) scale(1)`,
+            opacity: 1,
+            filter: "blur(0)"
+          },
+          {
+            transform: `translate3d(${sourceX}px,${sourceY - 22}px,0) scale(1.12)`,
+            opacity: 1,
+            filter: "blur(0)"
+          },
+          {
+            transform: `translate3d(${sourceX + Math.round(dx * .12)}px,${sourceY - 76}px,0) scale(1)`,
+            opacity: 1,
+            filter: "blur(0)"
+          },
+          {
+            transform: `translate3d(${sourceX + Math.round(dx * .38)}px,${sourceY + Math.round(dy * .18) - 58}px,0) scale(.86)`,
+            opacity: .98,
+            filter: "blur(0)"
+          },
+          {
+            transform: `translate3d(${sourceX + Math.round(dx * .72)}px,${sourceY + Math.round(dy * .68) - 26}px,0) scale(.58)`,
+            opacity: .82,
+            filter: "blur(.1px)"
+          },
+          {
+            transform: `translate3d(${destX}px,${destY}px,0) scale(.16)`,
+            opacity: .05,
+            filter: "blur(.45px)"
           }
-        );
+        ];
 
-        let done = false;
+        let finished = false;
         const finish = () => {
-          if (done) return;
-          done = true;
+          if (finished) return;
+          finished = true;
+          try { animation?.cancel(); } catch (_) {}
           sphere.remove();
           onFinish?.();
         };
 
-        animation.addEventListener("finish", finish, { once: true });
-        window.setTimeout(finish, 1000);
+        let animation;
+        try {
+          animation = sphere.animate(keyframes, {
+            duration: 900,
+            easing: "cubic-bezier(.12,.82,.22,1)",
+            fill: "forwards"
+          });
+          animation.addEventListener("finish", finish, { once: true });
+        } catch (_) {
+          // Browser fallback: keep the sphere visible briefly rather than silently failing.
+          window.setTimeout(finish, 900);
+        }
+
+        window.setTimeout(finish, 1050);
       };
 
       const selectOption = (option) => {
@@ -375,62 +379,43 @@
         const sourceElement = option.querySelector(".class-option-check") || option;
         const sourceRect = sourceElement.getBoundingClientRect();
 
-        // Close immediately. The sphere is created only after the menu is gone.
+        // 1) Menu closes immediately.
         closeMenu();
 
+        // 2) Selection changes locally.
         input.checked = true;
         option.classList.add("is-selected");
 
-        const pill = addDestinationPill(option);
-        if (!pill) {
-          renderSelected();
-          return;
-        }
+        // 3) Create only the final plain text label. No pill/bead visuals.
+        refreshVisualState();
 
-        pill.classList.remove("is-arriving");
+        const target = names?.lastElementChild;
+        if (!target) return;
+
+        // Reserve the target's final space before measuring the flight destination.
+        target.classList.add("selected-class-name-arriving");
+        const destinationRect = target.getBoundingClientRect();
+
+        // Hide only the final text while the real sphere is travelling.
+        target.classList.add("selected-class-name-hidden");
 
         requestAnimationFrame(() => {
-          // The pill stays invisible while the sphere travels into its exact position.
-          pill.classList.add("pill-awaiting");
-          const destination = pill.getBoundingClientRect();
-
-          launchSelectionSphere(sourceRect, {
-            getBoundingClientRect: () => destination
-          }, () => {
-            pill.classList.remove("pill-awaiting");
-            pill.classList.add("pill-settle");
-            window.setTimeout(() => pill.classList.remove("pill-settle"), 460);
+          animateSphere(sourceRect, destinationRect, () => {
+            target.classList.remove("selected-class-name-hidden");
+            target.classList.add("selected-class-name-settle");
+            window.setTimeout(
+              () => target.classList.remove("selected-class-name-settle"),
+              440
+            );
           });
         });
-
-        // Update the surrounding status immediately without rebuilding the pill.
-        if (countLabel) {
-          const count = getSelected().length;
-          countLabel.textContent = count + " sınıf seçildi";
-        }
-        if (triggerTitle) {
-          const selected = getSelected();
-          triggerTitle.textContent =
-            selected.length === 1 ? option.dataset.className : selected.length + " sınıf seçildi";
-        }
-        if (triggerSubtitle) {
-          triggerSubtitle.textContent = getSelected()
-            .map((item) => item.dataset.className)
-            .join(" • ");
-        }
-        if (scopeText) {
-          scopeText.textContent = getSelected().length + " SINIF İÇİN YAYIN";
-        }
-        if (scopeSubtext) {
-          scopeSubtext.textContent = "Seçilen sınıflardaki aktif öğrenciler projeyi görebilir.";
-        }
       };
 
       const unselectOption = (option) => {
         const input = option.querySelector("input");
         if (!input || !input.checked) return;
         input.checked = false;
-        renderSelected();
+        refreshVisualState();
       };
 
       trigger?.addEventListener("click", (event) => {
@@ -444,12 +429,12 @@
 
         option.addEventListener("click", (event) => {
           event.preventDefault();
-
           if (input?.checked) unselectOption(option);
           else selectOption(option);
         });
 
         input?.addEventListener("change", (event) => {
+          event.preventDefault();
           event.stopPropagation();
           if (input.checked) selectOption(option);
           else unselectOption(option);
@@ -468,15 +453,8 @@
           if (input) input.checked = !allSelected;
         });
 
-        renderSelected();
+        refreshVisualState();
         closeMenu();
-
-        if (!allSelected && pills) {
-          [...pills.querySelectorAll(".selected-class-pill")].forEach((pill, index) => {
-            pill.classList.add("pill-settle");
-            window.setTimeout(() => pill.classList.remove("pill-settle"), 440 + index * 35);
-          });
-        }
       });
 
       document.addEventListener("click", (event) => {
@@ -487,7 +465,7 @@
         if (event.key === "Escape") closeMenu();
       });
 
-      renderSelected();
+      refreshVisualState();
     }
 
     hideLoader();
