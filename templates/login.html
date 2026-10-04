@@ -1,74 +1,100 @@
 {% extends "auth_base.html" %}
-{% block title %}Giriş · Okul Sınav Proje{% endblock %}
+{% block title %}Okul Sınav Proje · Giriş{% endblock %}
 {% block content %}
-<main class="login-scene">
-  <div class="login-backdrop" aria-hidden="true"></div>
-  <div class="login-shade" aria-hidden="true"></div>
+<main class="portal">
+  <div class="portal-background" aria-hidden="true"></div>
+  <div class="portal-overlay" aria-hidden="true"></div>
 
-  <section class="login-content">
-    <header class="login-brand">
-      <div class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" class="brand-svg"><path d="M4 8.2 12 4l8 4.2-8 4.2L4 8.2Z"/><path d="M7 10.1V15c0 1.9 2.2 3.5 5 3.5s5-1.6 5-3.5v-4.9"/><path d="M20 8.2v5.4"/></svg>
+  <section class="portal-inner">
+    <header class="portal-header">
+      <div class="portal-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><path d="m4 11 12-6 12 6-12 6L4 11Z"/><path d="M8 13v6c0 3 3.4 5.5 8 5.5S24 22 24 19v-6"/><path d="M28 11v8"/></svg>
       </div>
-      <div>
-        <span>OKUL SINAV</span>
+      <div class="portal-wordmark">
+        <small>OKUL SINAV</small>
         <strong>PROJE</strong>
       </div>
     </header>
 
-    <div class="login-intro">
-      <span class="eyebrow">DİJİTAL PROJE YÖNETİMİ</span>
-      <h1>Projeler tek yerde.<br><strong>Süreç net.</strong></h1>
-      <p>Öğretmenler projelerini yayınlar, öğrenciler güvenli şekilde teslim eder.</p>
-    </div>
+    <section class="portal-intro">
+      <span>PROJE YÖNETİM SİSTEMİ</span>
+      <h1>Hoş geldiniz.</h1>
+      <p>Hesap türünüzü seçin ve devam edin.</p>
+    </section>
 
-    <section class="login-cards">
-      <article class="login-card teacher-card">
-        <div class="card-accent"></div>
-        <div class="login-card-head">
-          <span class="login-icon icon-teacher" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="ui-svg"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 19.5c.7-3.2 2.8-5 6.5-5s5.8 1.8 6.5 5"/></svg>
-          </span>
-          <div><span>ÖĞRETMEN</span><strong>Öğretmen girişi</strong></div>
+    <section class="portal-login-grid">
+      <article class="login-panel">
+        <div class="panel-line teacher"></div>
+        <div class="panel-title">
+          <div class="panel-icon teacher-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.4 19.2c.8-3.1 2.8-4.8 6.6-4.8s5.8 1.7 6.6 4.8"/></svg>
+          </div>
+          <div><small>ÖĞRETMEN</small><h2>Öğretmen girişi</h2></div>
         </div>
-        <p>Projelerinizi oluşturun, sınıflara yayınlayın ve teslimleri takip edin.</p>
-        <form class="card-form" method="post" action="{{ url_for('login') }}">
+        <p class="panel-text">Projeleri oluşturun, sınıflara yayınlayın ve teslimleri yönetin.</p>
+        <form method="post" action="{{ url_for('login') }}" class="login-form">
           <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
           <input type="hidden" name="role" value="teacher">
-          <label><span>Kullanıcı adı</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg><input name="username" autocomplete="username" required></div></label>
-          <label><span>Şifre</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input name="password" type="password" autocomplete="current-password" required></div></label>
-          <button class="login-submit teacher-submit" type="submit">Giriş yap <b>→</b></button>
+          <label>
+            <span>Kullanıcı adı</span>
+            <div class="input-box">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg>
+              <input name="username" autocomplete="username" required>
+            </div>
+          </label>
+          <label>
+            <span>Şifre</span>
+            <div class="input-box">
+              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <input name="password" type="password" autocomplete="current-password" required>
+            </div>
+          </label>
+          <button class="portal-button teacher-button" type="submit">Giriş yap <b>→</b></button>
         </form>
       </article>
 
-      <article class="login-card student-card">
-        <div class="card-accent"></div>
-        <div class="login-card-head">
-          <span class="login-icon icon-student" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="ui-svg"><path d="m3.5 9.2 8.5-4 8.5 4-8.5 4-8.5-4Z"/><path d="M7 11.2v4.2c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.2"/></svg>
-          </span>
-          <div><span>ÖĞRENCİ</span><strong>Öğrenci girişi</strong></div>
+      <article class="login-panel">
+        <div class="panel-line student"></div>
+        <div class="panel-title">
+          <div class="panel-icon student-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m3.5 9.2 8.5-4 8.5 4-8.5 4-8.5-4Z"/><path d="M7 11.2v4.2c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.2"/></svg>
+          </div>
+          <div><small>ÖĞRENCİ</small><h2>Öğrenci girişi</h2></div>
         </div>
-        <p>Sınıfınıza açılan projeleri görün, dosyanızı teslim edin ve durumunuzu takip edin.</p>
-        <form class="card-form" method="post" action="{{ url_for('login') }}">
+        <p class="panel-text">Size verilen projeleri görün, dosyanızı teslim edin ve durumunuzu takip edin.</p>
+        <form method="post" action="{{ url_for('login') }}" class="login-form">
           <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
           <input type="hidden" name="role" value="student">
-          <label><span>Kullanıcı adı</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg><input name="username" autocomplete="username" required></div></label>
-          <label><span>Şifre</span><div class="input-shell"><svg viewBox="0 0 24 24" class="field-svg"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input name="password" type="password" autocomplete="current-password" required></div></label>
-          <button class="login-submit student-submit" type="submit">Giriş yap <b>→</b></button>
+          <label>
+            <span>Kullanıcı adı</span>
+            <div class="input-box">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg>
+              <input name="username" autocomplete="username" required>
+            </div>
+          </label>
+          <label>
+            <span>Şifre</span>
+            <div class="input-box">
+              <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <input name="password" type="password" autocomplete="current-password" required>
+            </div>
+          </label>
+          <button class="portal-button student-button" type="submit">Giriş yap <b>→</b></button>
         </form>
       </article>
     </section>
 
-    <a class="chief-access" href="{{ url_for('login') }}?role=chief">
-      <span class="chief-access-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="ui-svg"><path d="M12 3.5 19 6v5.7c0 4.6-2.9 7.2-7 8.8-4.1-1.6-7-4.2-7-8.8V6l7-2.5Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg></span>
-      <span class="chief-access-label">ALAN ŞEFİ</span>
-      <strong>Yönetim erişimi <b>→</b></strong>
+    <a class="chief-strip" href="{{ url_for('login') }}?role=chief">
+      <span class="chief-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.7c0 4.6-2.9 7.2-7 8.8-4.1-1.6-7-4.2-7-8.8V6l7-2.5Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg>
+      </span>
+      <span><small>YÖNETİM</small><strong>Alan şefi girişi</strong></span>
+      <b>→</b>
     </a>
 
-    <footer class="login-footer">
-      <span>Okul Sınav Proje</span>
-      <span>Güvenli · Hızlı · Kurumsal</span>
+    <footer class="portal-footer">
+      <span>OKUL SINAV PROJE</span>
+      <span>Güvenli erişim · Proje yönetimi</span>
     </footer>
   </section>
 </main>
