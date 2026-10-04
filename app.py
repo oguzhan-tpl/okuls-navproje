@@ -503,7 +503,6 @@ def create_app():
                 app.logger.info("Database schema is ready.")
                 return True, None
             except OperationalError as exc:
-                global _db_ready
                 _db_ready = False
                 db.session.rollback()
                 db.session.remove()
