@@ -2,21 +2,27 @@
 {% block title %}Alan Şefi · Giriş{% endblock %}
 {% block content %}
 <main class="chief-auth">
+  <div class="chief-auth-bg" aria-hidden="true"></div>
   <section class="chief-auth-card">
-    <div class="auth-topline"><span class="brand-mark">OSP</span><span>ALAN ŞEFİ ERİŞİMİ</span></div>
-    <div class="chief-auth-copy">
-      <span class="eyebrow">YÖNETİM GİRİŞİ</span>
-      <h1>Sistemi<br><strong>yönet.</strong></h1>
-      <p>Öğretmen ve öğrenci hesaplarını, sınıfları ve proje hareketlerini buradan yönetebilirsiniz.</p>
+    <div class="chief-brand-row">
+      <span class="chief-brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="ui-svg"><path d="M12 3.5 19 6v5.7c0 4.6-2.9 7.2-7 8.8-4.1-1.6-7-4.2-7-8.8V6l7-2.5Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg>
+      </span>
+      <div><span>OKUL SINAV PROJE</span><strong>YÖNETİM ERİŞİMİ</strong></div>
     </div>
-    <form class="auth-form chief-form" method="post" action="{{ url_for('login') }}">
+    <div class="chief-auth-copy">
+      <span class="eyebrow">ALAN ŞEFİ</span>
+      <h1>Yönetim<br><strong>merkezi.</strong></h1>
+      <p>Öğretmen hesaplarını, sınıfları, projeleri ve öğrenci teslimlerini tek merkezden yönetin.</p>
+    </div>
+    <form class="chief-form" method="post" action="{{ url_for('login') }}">
       <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
       <input type="hidden" name="role" value="chief">
-      <label><span>Kullanıcı adı</span><input name="username" autocomplete="username" required></label>
-      <label><span>Şifre</span><input name="password" type="password" autocomplete="current-password" required></label>
-      <button class="button button-light" type="submit">Alan şefi girişi →</button>
+      <label><span>Kullanıcı adı</span><div class="chief-input"><svg viewBox="0 0 24 24" class="field-svg"><circle cx="12" cy="8" r="3"/><path d="M5.5 19c.7-3 2.7-4.7 6.5-4.7s5.8 1.7 6.5 4.7"/></svg><input name="username" autocomplete="username" required></div></label>
+      <label><span>Şifre</span><div class="chief-input"><svg viewBox="0 0 24 24" class="field-svg"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input name="password" type="password" autocomplete="current-password" required></div></label>
+      <button class="button chief-submit" type="submit">Alan şefi girişi <b>→</b></button>
     </form>
-    <a class="back-login" href="{{ url_for('home') }}">← Öğretmen / öğrenci girişine dön</a>
+    <a class="back-login" href="{{ url_for('home') }}"><span>←</span> Öğretmen / öğrenci girişine dön</a>
   </section>
 </main>
 {% endblock %}
