@@ -1,6 +1,8 @@
 import hashlib
 import os
 import secrets
+import threading
+import time
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from functools import wraps
@@ -24,6 +26,13 @@ db = SQLAlchemy()
 
 ROLES = {"chief", "teacher", "student"}
 APP_TIMEZONE = ZoneInfo(os.getenv("APP_TIMEZONE", "Europe/Istanbul"))
+
+# Veritabanı şeması artık Gunicorn worker başlarken oluşturulmaz.
+# Böylece TiDB'nin DDL işlemleri Render deploy'unu kilitlemez.
+_db_init_lock = threading.Lock()
+_db_ready = False
+_db_last_error = None
+_db_last_attempt = 0.0
 
 ALLOWED_EXTENSIONS = {
     "7z", "c", "cpp", "css", "csv", "doc", "docx", "gif", "html",
@@ -377,39 +386,95 @@ def create_app():
             return wrapped
         return decorator
 
-    def ensure_bootstrap():
-        with app.app_context():
-            db.create_all()
-            username = os.getenv("BOOTSTRAP_CHIEF_USERNAME", "").strip().lower()
-            password = os.getenv("BOOTSTRAP_CHIEF_PASSWORD", "")
-            full_name = os.getenv("BOOTSTRAP_CHIEF_NAME", "Alan Şefi").strip()
+    def ensure_database():
+        global _db_ready, _db_last_error, _db_last_attempt
 
-            if not username or not password:
-                return
+        if _db_ready:
+            return True, None
 
-            exists = db.session.scalar(
-                select(User.id).where(User.username == username)
-            )
-            if exists:
-                return
+        # Aynı worker içindeki paralel ilk isteklerin birbirini ezmesini önler.
+        with _db_init_lock:
+            if _db_ready:
+                return True, None
 
-            chief = User(
-                username=username,
-                full_name=full_name or "Alan Şefi",
-                password_hash=generate_password_hash(password),
-                role="chief",
-                active=True,
-            )
-            db.session.add(chief)
+            now = time.monotonic()
+            # Hatalı bir veritabanı yapılandırmasında her isteğin tekrar tekrar
+            # DDL denemesine girmesini önle. 10 saniye sonra yeniden deneyebilir.
+            if _db_last_error and now - _db_last_attempt < 10:
+                return False, _db_last_error
+
+            _db_last_attempt = now
             try:
-                db.session.commit()
-            except IntegrityError:
+                with app.app_context():
+                    # TiDB üzerinde uygulama tabloları yalnızca uygulama
+                    # veritabanında oluşturulur. normalize_db_url() /sys gibi
+                    # sistem şemalarını DB_NAME (varsayılan: test) ile değiştirir.
+                    db.create_all()
+
+                    username = os.getenv("BOOTSTRAP_CHIEF_USERNAME", "").strip().lower()
+                    password = os.getenv("BOOTSTRAP_CHIEF_PASSWORD", "")
+                    full_name = os.getenv("BOOTSTRAP_CHIEF_NAME", "Alan Şefi").strip()
+
+                    if username and password:
+                        exists = db.session.scalar(
+                            select(User.id).where(User.username == username)
+                        )
+                        if not exists:
+                            chief = User(
+                                username=username,
+                                full_name=full_name or "Alan Şefi",
+                                password_hash=generate_password_hash(password),
+                                role="chief",
+                                active=True,
+                            )
+                            db.session.add(chief)
+                            try:
+                                db.session.commit()
+                            except IntegrityError:
+                                db.session.rollback()
+
+                _db_ready = True
+                _db_last_error = None
+                app.logger.info("Database schema is ready.")
+                return True, None
+            except Exception as exc:
                 db.session.rollback()
+                _db_last_error = str(exc)
+                app.logger.exception("Database initialization failed.")
+                return False, _db_last_error
+
+    @app.before_request
+    def ensure_database_for_application_requests():
+        # Render'ın health check'i yalnızca process/HTTP canlılığını ölçsün.
+        # Veritabanı DDL'si yüzünden deploy'un kilitlenmesini istemiyoruz.
+        if request.path == "/healthz":
+            return None
+
+        ready, error = ensure_database()
+        if ready:
+            return None
+
+        return render_template(
+            "error.html",
+            code=503,
+            message=(
+                "Veritabanı hazırlanamadı. Render/TiDB bağlantısını kontrol edin."
+            ),
+            debug_message=error if app.debug else None,
+        ), 503
 
     @app.get("/healthz")
     def healthz():
-        db.session.execute(text("SELECT 1"))
+        # Liveness endpoint: DB/DDL işlemi içermez. Render'ın yeni container'ı
+        # portu açar açmaz sağlıklı kabul edilebilsin.
         return {"status": "ok", "service": "okuls-navproje"}, 200
+
+    @app.get("/readyz")
+    def readyz():
+        ready, error = ensure_database()
+        if ready:
+            return {"status": "ready", "database": "ok"}, 200
+        return {"status": "not_ready", "database": "error", "message": error}, 503
 
     @app.route("/", methods=["GET"])
     def home():
@@ -1125,12 +1190,6 @@ def create_app():
 
     def current_app_max_upload():
         return app.config["MAX_CONTENT_LENGTH"]
-
-    with app.app_context():
-        try:
-            ensure_bootstrap()
-        except Exception as exc:
-            app.logger.exception("Database initialization is unavailable: %s", exc)
 
     return app
 
