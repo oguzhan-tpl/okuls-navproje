@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Yeni Proje · Okul Sınav Proje{% endblock %}
+{% block kicker %}ÖĞRETMEN PANELİ / YENİ PROJE{% endblock %}
+{% block heading %}Proje oluştur{% endblock %}
+{% block content %}
+<form class="form-stack" method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <section class="form-section">
+    <div class="form-section-title"><span>01</span><div><h2>Temel bilgiler</h2><p>Öğrencinin göreceği proje başlığını ve açıklamayı oluşturun.</p></div></div>
+    <div class="field-grid">
+      <label class="field wide"><span>Proje başlığı</span><input name="title" value="{{ form.get('title','') }}" maxlength="180" required placeholder="Örn. Web Tasarım Uygulaması"></label>
+      <label class="field"><span>Ders / alan</span><input name="course" value="{{ form.get('course','') }}" maxlength="100" placeholder="Bilişim Teknolojileri"></label>
+      <label class="field wide"><span>Açıklama</span><textarea name="description" rows="6" required placeholder="Projenin amacı, teslim beklentisi ve temel açıklamalar...">{{ form.get('description','') }}</textarea></label>
+      <label class="field wide"><span>Gereksinimler</span><textarea name="requirements" rows="5" placeholder="Dosya formatı, klasör yapısı, kaynaklar veya özel notlar...">{{ form.get('requirements','') }}</textarea></label>
+      <label class="field"><span>Son teslim tarihi</span><input name="deadline" type="datetime-local" value="{{ form.get('deadline','') }}"></label>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-title"><span>02</span><div><h2>Sınıfları seç</h2><p>Proje yalnızca seçtiğiniz sınıflardaki öğrencilerin panelinde görünür.</p></div></div>
+    <div class="class-picker">
+      {% for classroom in classrooms %}
+        <label class="class-option">
+          <input type="checkbox" name="class_ids" value="{{ classroom.id }}" {% if classroom.id|string in request.form.getlist('class_ids') %}checked{% endif %}>
+          <span class="class-square"></span>
+          <div><strong>{{ classroom.name }}</strong><small>{{ classroom.students|length }} öğrenci</small></div>
+        </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="publish-bar">
+    <div><span class="status-dot"></span><div><strong>Yayınlama</strong><p>Yayınlandığında seçilen öğrenciler projeyi anında görür.</p></div></div>
+    <label class="switch"><input type="checkbox" name="publish" value="1" checked><span></span></label>
+  </section>
+
+  <div class="form-actions">
+    <a class="button button-ghost" href="{{ url_for('teacher_dashboard') }}">Vazgeç</a>
+    <button class="button button-dark" type="submit">Projeyi oluştur →</button>
+  </div>
+</form>
+{% endblock %}
