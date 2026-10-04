@@ -3,33 +3,6 @@
 {% block kicker %}ALAN ŞEFİ / SINIF YÖNETİMİ{% endblock %}
 {% block heading %}Sınıflar{% endblock %}
 {% block content %}
-<section class="split-layout">
-  <div class="section-block">
-    <div class="section-head"><div><span class="section-kicker">YENİ SINIF</span><h2>Sınıf oluştur</h2></div></div>
-    <form class="form-stack compact-form" method="post">
-      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-      <div class="field-grid">
-        <label class="field"><span>Sınıf seviyesi</span><select name="grade" required><option value="">Seçin</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label>
-        <label class="field"><span>Şube</span><input name="section" maxlength="10" required placeholder="A"></label>
-      </div>
-      <button class="button button-dark" type="submit">Sınıfı oluştur →</button>
-    </form>
-  </div>
-  <div class="section-block">
-    <div class="section-head"><div><span class="section-kicker">SINIF KATALOĞU</span><h2>Tanımlı sınıflar</h2></div></div>
-    <div class="account-list">
-      {% for classroom in classrooms %}
-      <div class="account-row">
-        <div class="class-badge">{{ classroom.name }}</div>
-        <div class="account-main"><strong>{{ classroom.name }}</strong><span>{{ classroom.students|length }} öğrenci · {{ classroom.projects|length }} proje bağlantısı</span></div>
-        <span class="tag {{ 'tag-green' if classroom.active else 'tag-neutral' }}">{{ 'AKTİF' if classroom.active else 'PASİF' }}</span>
-        <form method="post" action="{{ url_for('chief_toggle_class', class_id=classroom.id) }}">
-          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
-          <button class="text-button" type="submit">{{ 'Pasifleştir' if classroom.active else 'Aktifleştir' }}</button>
-        </form>
-      </div>
-      {% else %}<div class="class-empty">Henüz sınıf tanımlanmadı.</div>{% endfor %}
-    </div>
-  </div>
-</section>
+<section class="split-layout"><div class="section-block"><div class="section-head"><div><span class="section-kicker">SINIF TANIMI</span><h2>Yeni sınıf</h2></div></div><form class="form-stack" method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><label class="field"><span>Sınıf seviyesi</span><select name="grade" required><option value="">Seçin</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label><label class="field"><span>Şube</span><input name="section" maxlength="10" required placeholder="A"></label><button class="button button-dark" type="submit">Sınıfı oluştur <span>→</span></button></form></div>
+<div class="section-block"><div class="section-head"><div><span class="section-kicker">SINIF KATALOĞU</span><h2>Tanımlı sınıflar</h2></div><span class="subtle">{{ classrooms|length }} sınıf</span></div><div class="account-list">{% for classroom in classrooms %}<div class="account-row"><div class="class-badge">{{ classroom.name }}</div><div class="account-main"><strong>{{ classroom.name }}</strong><span>{{ classroom.students|length }} öğrenci · Öğretmenler sınıfa atanmaz</span></div><span class="tag {{ 'tag-green' if classroom.active else 'tag-neutral' }}">{{ 'AKTİF' if classroom.active else 'PASİF' }}</span><span></span><form method="post" action="{{ url_for('chief_toggle_class',class_id=classroom.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="text-button" type="submit">{{ 'Pasifleştir' if classroom.active else 'Aktifleştir' }}</button></form></div>{% else %}<div class="class-empty">Henüz sınıf tanımlanmadı.</div>{% endfor %}</div></div></section>
 {% endblock %}
