@@ -70,6 +70,12 @@ Python 3.11 önerilir.
 
 İlk açılışta bootstrap değişkenleri doluysa alan şefi hesabı otomatik oluşturulur.
 
+## Docker ve Render
+
+Repo kökünde production Dockerfile ve Docker build'i tanımlayan render.yaml bulunur. Render Blueprint `runtime: docker` ile bu Dockerfile'ı doğrudan build eder; Dockerfile içinde Gunicorn ve varsayılan port için güvenli çalışma komutu bulunur.
+
+Render, Docker servislerini Dockerfile üzerinden build edip çalıştırabilir. Blueprint tarafında `runtime: docker`, `dockerfilePath` ve `healthCheckPath` kullanılabilir. citeturn370466search3turn696441search0
+
 ## Render
 
 Repo, Render Blueprint için render.yaml içerir.
@@ -83,11 +89,11 @@ gunicorn --workers 1 --threads 2 --timeout 120 app:app
 Health check:
 GET /healthz
 
-Render üzerinde şu gizli değişkenler verilmelidir:
+Render üzerinde yalnızca şu gizli değişkenin verilmesi gerekir:
 
 DATABASE_URL
-BOOTSTRAP_CHIEF_USERNAME
-BOOTSTRAP_CHIEF_PASSWORD
+
+Alan şefi kullanıcı adı `alansefi` olarak tanımlıdır; başlangıç şifresi Render tarafından otomatik üretilir ve `BOOTSTRAP_CHIEF_PASSWORD` ile tutulur. `SECRET_KEY` de otomatik üretilir. Render Blueprint'teki `generateValue: true` bu amaçla kullanılabilir; gizli bağlantı bilgilerinin YAML içine yazılması önerilmez. citeturn696441search0turn370466search2
 
 SECRET_KEY render.yaml tarafından üretilebilir. TiDB bağlantı adresini kaynak koduna yazmayın.
 
