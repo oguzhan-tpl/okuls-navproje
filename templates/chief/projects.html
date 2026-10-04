@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Alan Şefi · Projeler{% endblock %}
+{% block kicker %}ALAN ŞEFİ / PROJE İZLEME{% endblock %}
+{% block heading %}Projeler{% endblock %}
+{% block content %}
+<section class="section-block">
+  <div class="section-head"><div><span class="section-kicker">TÜM PROJELER</span><h2>Sistem genelindeki projeler</h2></div><span class="subtle">{{ projects|length }} kayıt</span></div>
+  {% if projects %}
+  <div class="project-table">
+    {% for project in projects %}
+    <div class="project-row static-row">
+      <div class="project-index">{{ loop.index }}</div>
+      <div class="project-main"><strong>{{ project.title }}</strong><span>{{ project.teacher.full_name }} · {{ project.classes|map(attribute='name')|join(', ') }}</span></div>
+      <div class="project-stat"><small>DURUM</small><strong>{{ 'Yayında' if project.published else 'Taslak' }}</strong></div>
+      <div class="project-stat"><small>SINIF</small><strong>{{ project.classes|length }}</strong></div>
+      <div class="project-stat"><small>TESLİM</small><strong>{{ project.submissions|length }}</strong></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><h3>Henüz proje bulunmuyor.</h3></div>
+  {% endif %}
+</section>
+{% endblock %}
