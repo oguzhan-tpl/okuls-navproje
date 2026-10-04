@@ -20,6 +20,7 @@
       <span class="user-role">{{ {'chief':'ALAN ŞEFİ','teacher':'ÖĞRETMEN','student':'ÖĞRENCİ'}[me.role] }}</span>
       <div class="user-line"><div class="user-avatar">{{ me.full_name[:1]|upper }}</div><div class="user-meta"><strong>{{ me.full_name }}</strong><small>{{ me.classroom.name if me.classroom else me.username }}</small></div></div>
     </div>
+    <div class="sidebar-section-label">ÇALIŞMA ALANI</div>
     <nav class="sidebar-nav" aria-label="Ana menü">
       {% if me.role=='chief' %}
       <a href="{{ url_for('chief_dashboard') }}" class="{{ 'active' if request.endpoint=='chief_dashboard' else '' }}"><span class="nav-icon"><svg class="ui-svg" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span>Genel bakış</a>
@@ -33,6 +34,10 @@
       <a href="{{ url_for('student_dashboard') }}" class="{{ 'active' if request.endpoint=='student_dashboard' else '' }}"><span class="nav-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="m8 12 2 2 5-6M8 8h6"/></svg></span>Projelerim</a>
       {% endif %}
     </nav>
+    <div class="sidebar-status" aria-hidden="true">
+      <span class="status-orb"></span>
+      <span><strong>Sistem aktif</strong><small>Güvenli çalışma alanı</small></span>
+    </div>
     <form method="post" action="{{ url_for('logout') }}" class="sidebar-logout"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button type="submit"><span>Oturumu kapat</span><svg class="ui-svg" viewBox="0 0 24 24"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg></button></form>
   </aside>
   <main class="main-area">
