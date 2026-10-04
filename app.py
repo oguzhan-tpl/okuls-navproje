@@ -248,7 +248,7 @@ def create_app():
         MAX_CONTENT_LENGTH=int(os.getenv("MAX_UPLOAD_MB", "16")) * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        SESSION_COOKIE_SECURE=os.getenv("COOKIE_SECURE", "true").lower() == "true",
+        SESSION_COOKIE_SECURE=os.getenv("COOKIE_SECURE", "false").lower() == "true",
         PERMANENT_SESSION_LIFETIME=60 * 60 * 12,
     )
     db.init_app(app)
@@ -718,6 +718,7 @@ def create_app():
             "student/project_detail.html",
             project=project,
             submission=submission,
+            locked=bool(project.deadline and datetime.utcnow() > project.deadline),
         )
 
     @app.post("/student/projects/<int:project_id>/submit")
