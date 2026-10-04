@@ -3,21 +3,130 @@
 {% block kicker %}ÖĞRETMEN / YENİ PROJE{% endblock %}
 {% block heading %}Proje oluştur{% endblock %}
 {% block content %}
-<form class="form-stack" method="post" data-loading data-loading-title="Proje oluşturuluyor" data-loading-text="Proje kaydediliyor ve yayın ayarları uygulanıyor."><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<form class="form-stack" method="post" data-loading data-loading-title="Proje hazırlanıyor" data-loading-text="Seçtiğiniz sınıflar ve proje bilgileri kaydediliyor.">
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
 <div class="form-layout">
-<div class="form-section"><div class="form-section-title"><span class="step-badge">01</span><div><h2>Proje bilgileri</h2><p>Öğrencinin göreceği içeriği ve teslim koşullarını tanımlayın.</p></div></div>
-<div class="field-grid">
-<label class="field wide"><span>Proje başlığı</span><input name="title" value="{{ form.get('title','') }}" maxlength="180" required placeholder="Örn. Web Tasarım Uygulaması"></label>
-<label class="field"><span>Ders / alan</span><input name="course" value="{{ form.get('course','') }}" maxlength="100" placeholder="Bilişim Teknolojileri"></label>
-<label class="field"><span>Son teslim</span><input name="deadline" type="datetime-local" value="{{ form.get('deadline','') }}"></label>
-<label class="field wide"><span>Açıklama</span><textarea name="description" rows="7" required placeholder="Projenin amacı, yapılacaklar ve teslim beklentisi...">{{ form.get('description','') }}</textarea></label>
-<label class="field wide"><span>Gereksinimler</span><textarea name="requirements" rows="5" placeholder="Dosya biçimi, klasör yapısı, kaynaklar veya özel notlar...">{{ form.get('requirements','') }}</textarea></label>
-</div></div>
-<aside class="publish-panel">
-<div class="publish-note"><div class="icon-box"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 12 12 5l8 7M7 11v9h10v-9M10 20v-5h4v5"/></svg></div><h3>Yayın kapsamı</h3><p>Öğretmenler sınıf seçmez. Proje yayınlandığı anda sistemdeki tüm aktif öğrencilerin paneline düşer.</p></div>
-<div class="scope-banner"><strong>TÜM AKTİF ÖĞRENCİLER</strong><span>9, 10, 11 ve 12. sınıflar dahil. Öğretmen hesabına sınıf ataması yapılmaz.</span></div>
-<div class="switch-row"><div class="switch-copy"><strong>Projeyi şimdi yayınla</strong><span>Kapalı bırakırsanız taslak kaydedilir.</span></div><label class="switch"><input type="checkbox" name="publish" value="1" checked><span></span></label></div>
-<div class="form-actions"><a class="button button-ghost" href="{{ url_for('teacher_dashboard') }}">Vazgeç</a><button class="button button-primary" type="submit">Projeyi kaydet <span>→</span></button></div>
-</aside>
-</div></form>
+  <div class="form-section">
+    <div class="form-section-title project-form-title">
+      <span class="step-badge">01</span>
+      <div class="project-title-copy">
+        <h2>Proje bilgileri</h2>
+        <p>Öğrencilerin göreceği içerik ve teslim koşullarını tanımlayın.</p>
+      </div>
+      <div class="selected-class-pills" data-selected-pills aria-live="polite"></div>
+    </div>
+
+    <div class="field-grid">
+      <label class="field wide">
+        <span>Proje başlığı</span>
+        <input name="title" value="{{ form.get('title','') }}" maxlength="180" required placeholder="Örn. Web Tasarım Uygulaması">
+      </label>
+
+      <label class="field">
+        <span>Ders / alan</span>
+        <input name="course" value="{{ form.get('course','') }}" maxlength="100" placeholder="Bilişim Teknolojileri">
+      </label>
+
+      <label class="field">
+        <span>Son teslim</span>
+        <input name="deadline" type="datetime-local" value="{{ form.get('deadline','') }}">
+      </label>
+
+      <label class="field wide">
+        <span>Açıklama</span>
+        <textarea name="description" rows="7" required placeholder="Projenin amacı, yapılacaklar ve teslim beklentisi...">{{ form.get('description','') }}</textarea>
+      </label>
+
+      <label class="field wide">
+        <span>Gereksinimler</span>
+        <textarea name="requirements" rows="5" placeholder="Dosya biçimi, klasör yapısı, kaynaklar veya özel notlar...">{{ form.get('requirements','') }}</textarea>
+      </label>
+    </div>
+
+    <div class="class-picker-wrap">
+      <div class="class-picker-label">
+        <div>
+          <span>YAYIN SINIFLARI</span>
+          <strong>Projeyi hangi sınıflar görecek?</strong>
+        </div>
+        <em data-class-count>0 sınıf seçildi</em>
+      </div>
+
+      <div class="class-combobox" data-class-picker>
+        <button type="button" class="class-combobox-trigger" data-class-trigger aria-expanded="false">
+          <span class="class-trigger-icon">
+            <svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4z"/><path d="M8 10h8M8 14h5"/></svg>
+          </span>
+          <span class="class-trigger-copy">
+            <strong data-class-trigger-title>Sınıf seçin</strong>
+            <small data-class-trigger-subtitle>Birden fazla sınıf seçebilirsiniz</small>
+          </span>
+          <svg class="ui-svg class-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+
+        <div class="class-combobox-menu" data-class-menu hidden>
+          <div class="class-menu-head">
+            <span>AKTİF SINIFLAR</span>
+            <button type="button" data-class-select-all>Tümünü seç</button>
+          </div>
+          <div class="class-option-list">
+            {% for classroom in classrooms %}
+            <label class="class-option" data-class-option data-class-id="{{ classroom.id }}" data-class-name="{{ classroom.name }}">
+              <input
+                type="checkbox"
+                name="class_ids"
+                value="{{ classroom.id }}"
+                {% if classroom.id in selected_class_ids %}checked{% endif %}
+              >
+              <span class="class-option-check">
+                <svg class="ui-svg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+              </span>
+              <span class="class-option-copy">
+                <strong>{{ classroom.name }}</strong>
+                <small>{{ classroom.students|length }} öğrenci</small>
+              </span>
+              <span class="class-option-dot"></span>
+            </label>
+            {% else %}
+            <div class="class-menu-empty">Önce Alan Şefi tarafından aktif sınıf oluşturulmalı.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="publish-panel">
+    <div class="publish-note">
+      <div class="icon-box">
+        <svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 12 12 5l8 7M7 11v9h10v-9M10 20v-5h4v5"/></svg>
+      </div>
+      <h3>Yayın kapsamı</h3>
+      <p>Projeyi yayınladığınızda yalnızca burada seçtiğiniz sınıflardaki aktif öğrenciler görebilir.</p>
+    </div>
+
+    <div class="scope-banner">
+      <strong data-scope-text>SINIF SEÇİMİ BEKLİYOR</strong>
+      <span data-scope-subtext>Proje yayınlamadan önce en az bir sınıf seçin.</span>
+    </div>
+
+    <div class="switch-row">
+      <div class="switch-copy">
+        <strong>Projeyi şimdi yayınla</strong>
+        <span>Kapalı bırakırsanız taslak olarak kaydedilir.</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="publish" value="1" checked>
+        <span></span>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <a class="button button-ghost" href="{{ url_for('teacher_dashboard') }}">Vazgeç</a>
+      <button class="button button-primary" type="submit">Projeyi kaydet <span>→</span></button>
+    </div>
+  </aside>
+</div>
+</form>
 {% endblock %}
