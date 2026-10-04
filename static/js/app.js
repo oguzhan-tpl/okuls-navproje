@@ -301,62 +301,57 @@
         }
 
         const targetRect = targetElement.getBoundingClientRect();
-        const sx = sourceRect.left + sourceRect.width / 2;
-        const sy = sourceRect.top + sourceRect.height / 2;
-        const tx = targetRect.left + targetRect.width / 2;
-        const ty = targetRect.top + targetRect.height / 2;
-
-        const sphere = document.createElement("span");
-        sphere.className = "class-selection-sphere";
-        sphere.setAttribute("aria-hidden", "true");
-        sphere.style.left = Math.round(sx - 16) + "px";
-        sphere.style.top = Math.round(sy - 16) + "px";
-        sphere.style.opacity = "1";
-        sphere.style.transform = "translate3d(0,0,0) scale(1)";
-        document.body.appendChild(sphere);
-
-        // Force layout so the sphere is painted at the source before it starts moving.
-        void sphere.offsetWidth;
+        const sx = Math.round(sourceRect.left + sourceRect.width / 2 - 17);
+        const sy = Math.round(sourceRect.top + sourceRect.height / 2 - 17);
+        const tx = Math.round(targetRect.left + targetRect.width / 2 - 17);
+        const ty = Math.round(targetRect.top + targetRect.height / 2 - 17);
 
         const dx = tx - sx;
         const dy = ty - sy;
 
+        const sphere = document.createElement("span");
+        sphere.className = "class-selection-sphere";
+        sphere.setAttribute("aria-hidden", "true");
+        document.body.appendChild(sphere);
+
+        // No element.style writes: the site's strict CSP stays intact.
+        // Coordinates are carried entirely by Web Animations keyframes.
         const animation = sphere.animate(
           [
             {
-              transform: "translate3d(0,0,0) scale(1)",
+              transform: `translate3d(${sx}px,${sy}px,0) scale(1)`,
               opacity: 1,
               filter: "blur(0)"
             },
             {
-              transform: "translate3d(0,-18px,0) scale(1.08)",
+              transform: `translate3d(${sx}px,${sy - 24}px,0) scale(1.08)`,
               opacity: 1,
               filter: "blur(0)"
             },
             {
-              transform: `translate3d(${Math.round(dx * 0.12)}px,-58px,0) scale(.96)`,
+              transform: `translate3d(${sx + Math.round(dx * 0.08)}px,${sy - 62}px,0) scale(.98)`,
               opacity: 1,
               filter: "blur(0)"
             },
             {
-              transform: `translate3d(${Math.round(dx * 0.42)}px,${Math.round(dy * 0.28 - 48)}px,0) scale(.76)`,
-              opacity: .96,
+              transform: `translate3d(${sx + Math.round(dx * 0.32)}px,${sy - 54}px,0) scale(.86)`,
+              opacity: .98,
               filter: "blur(0)"
             },
             {
-              transform: `translate3d(${Math.round(dx * 0.78)}px,${Math.round(dy * 0.76 - 18)}px,0) scale(.48)`,
-              opacity: .72,
-              filter: "blur(.15px)"
+              transform: `translate3d(${sx + Math.round(dx * 0.66)}px,${sy + Math.round(dy * 0.62) - 28}px,0) scale(.58)`,
+              opacity: .86,
+              filter: "blur(.1px)"
             },
             {
-              transform: `translate3d(${Math.round(dx)}px,${Math.round(dy)}px,0) scale(.22)`,
-              opacity: .08,
-              filter: "blur(.4px)"
+              transform: `translate3d(${tx}px,${ty}px,0) scale(.20)`,
+              opacity: .10,
+              filter: "blur(.35px)"
             }
           ],
           {
-            duration: 720,
-            easing: "cubic-bezier(.16,.82,.22,1)",
+            duration: 820,
+            easing: "cubic-bezier(.12,.82,.22,1)",
             fill: "forwards"
           }
         );
@@ -365,13 +360,12 @@
         const finish = () => {
           if (done) return;
           done = true;
-          animation.cancel();
           sphere.remove();
           onFinish?.();
         };
 
         animation.addEventListener("finish", finish, { once: true });
-        window.setTimeout(finish, 900);
+        window.setTimeout(finish, 1000);
       };
 
       const selectOption = (option) => {
