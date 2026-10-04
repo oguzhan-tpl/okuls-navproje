@@ -151,7 +151,7 @@
       const selectAll = classPicker.querySelector("[data-class-select-all]");
       const options = [...classPicker.querySelectorAll("[data-class-option]")];
 
-      const renderSelected = (animate = false, changedOption = null) => {
+      const renderSelected = () => {
         const selected = options.filter((option) =>
           option.querySelector("input")?.checked
         );
@@ -191,17 +191,13 @@
 
         if (pills) {
           pills.innerHTML = "";
-          selected.forEach((option, index) => {
+          selected.forEach((option) => {
             const pill = document.createElement("span");
             pill.className = "selected-class-pill";
             pill.innerHTML =
               '<span class="selected-class-dot"></span>' +
               '<strong></strong>';
             pill.querySelector("strong").textContent = option.dataset.className;
-
-            if (animate && (changedOption === option || index === selected.length - 1)) {
-              pill.classList.add("pill-enter");
-            }
             pills.appendChild(pill);
           });
         }
@@ -221,81 +217,105 @@
         }
       };
 
-      const closeMenu = () => {
-        menu.hidden = true;
-        classPicker.classList.remove("is-open");
-        trigger?.setAttribute("aria-expanded", "false");
+      const createArrivalSlot = () => {
+        if (!pills) return null;
+        const slot = document.createElement("span");
+        slot.className = "class-chip-arrival-slot";
+        slot.setAttribute("aria-hidden", "true");
+        pills.appendChild(slot);
+        return slot;
       };
 
-      const openMenu = () => {
-        menu.hidden = false;
-        classPicker.classList.add("is-open");
-        trigger?.setAttribute("aria-expanded", "true");
+      const flySphereToHeader = (sourceRect, targetElement, onArrive) => {
+        if (!targetElement) {
+          onArrive?.();
+          return;
+        }
+
+        const target = targetElement.getBoundingClientRect();
+        const sourceX = sourceRect.left + sourceRect.width / 2;
+        const sourceY = sourceRect.top + sourceRect.height / 2;
+        const targetX = target.left + target.width / 2;
+        const targetY = target.top + target.height / 2;
+
+        const sphere = document.createElement("span");
+        sphere.className = "class-selection-sphere";
+        sphere.style.left = (sourceX - 16) + "px";
+        sphere.style.top = (sourceY - 16) + "px";
+        sphere.style.setProperty("--fly-x", (targetX - sourceX) + "px");
+        sphere.style.setProperty("--fly-y", (targetY - sourceY) + "px");
+        document.body.appendChild(sphere);
+
+        requestAnimationFrame(() => sphere.classList.add("is-flying"));
+
+        const finish = () => {
+          sphere.remove();
+          onArrive?.();
+        };
+
+        sphere.addEventListener("animationend", finish, { once: true });
+        window.setTimeout(finish, 760);
       };
 
-      trigger?.addEventListener("click", (event) => {
-        event.preventDefault();
-        if (menu.hidden) openMenu();
-        else closeMenu();
-      });
+      const animateSelection = (option) => {
+        if (!pills) {
+          renderSelected();
+          return;
+        }
 
-      const flyChipToHeader = (option) => {
-        if (!pills) return;
-        const source = option.getBoundingClientRect();
-        const targetBox = pills.getBoundingClientRect();
-        const target = targetBox.width
-          ? {
-              x: targetBox.left + Math.min(targetBox.width - 30, 18),
-              y: targetBox.top + targetBox.height / 2,
-            }
-          : {
-              x: classPicker.getBoundingClientRect().left + 160,
-              y: classPicker.getBoundingClientRect().top - 20,
-            };
+        const sourceRect = option.getBoundingClientRect();
 
-        const flight = document.createElement("span");
-        flight.className = "class-chip-flight";
-        flight.textContent = option.dataset.className || "Sınıf";
-        flight.style.left = (source.left + source.width / 2 - 35) + "px";
-        flight.style.top = (source.top + source.height / 2 - 14) + "px";
-        document.body.appendChild(flight);
+        // Render the real destination first so the sphere has a precise landing point.
+        renderSelected();
+
+        const selectedPill = [...pills.querySelectorAll(".selected-class-pill")]
+          .find((pill) => pill.querySelector("strong")?.textContent === option.dataset.className);
+
+        if (!selectedPill) return;
+
+        selectedPill.classList.add("pill-awaiting");
+        const slot = createArrivalSlot();
+        const target = slot || selectedPill;
+
+        closeMenu();
 
         requestAnimationFrame(() => {
-          flight.style.setProperty("--fly-x", (target.x - source.left - source.width / 2) + "px");
-          flight.style.setProperty("--fly-y", (target.y - source.top - source.height / 2) + "px");
-          flight.classList.add("is-flying");
+          flySphereToHeader(sourceRect, target, () => {
+            slot?.remove();
+            selectedPill.classList.remove("pill-awaiting");
+            selectedPill.classList.add("pill-settle");
+            window.setTimeout(() => selectedPill.classList.remove("pill-settle"), 420);
+          });
         });
-
-        window.setTimeout(() => flight.remove(), 520);
       };
 
-      const toggleOption = (option, shouldClose) => {
+      const syncOptionSelection = (option) => {
+        const input = option.querySelector("input");
+        if (!input) return;
+
+        if (input.checked) {
+          animateSelection(option);
+        } else {
+          renderSelected();
+        }
+      };
+
+      const toggleOption = (option) => {
         const input = option.querySelector("input");
         if (!input) return;
         input.checked = !input.checked;
-        renderSelected(true, input.checked ? option : null);
-
-        if (input.checked) {
-          flyChipToHeader(option);
-          if (shouldClose) {
-            window.setTimeout(closeMenu, 160);
-          }
-        }
+        syncOptionSelection(option);
       };
 
       options.forEach((option) => {
         option.addEventListener("click", (event) => {
           if (event.target.closest("input")) return;
           event.preventDefault();
-          toggleOption(option, true);
+          toggleOption(option);
         });
 
         option.querySelector("input")?.addEventListener("change", () => {
-          renderSelected(true, option);
-          if (option.querySelector("input")?.checked) {
-            flyChipToHeader(option);
-            window.setTimeout(closeMenu, 160);
-          }
+          syncOptionSelection(option);
         });
       });
 
@@ -303,11 +323,30 @@
         event.preventDefault();
         const allSelected = options.length > 0 &&
           options.every((option) => option.querySelector("input")?.checked);
+
         options.forEach((option) => {
           const input = option.querySelector("input");
           if (input) input.checked = !allSelected;
         });
-        renderSelected(true, null);
+
+        if (allSelected) {
+          renderSelected();
+          closeMenu();
+          return;
+        }
+
+        // Bulk selection uses the same visual destination but without spawning many
+        // simultaneous orbs, keeping the interface smooth on lower-end devices.
+        renderSelected();
+        closeMenu();
+        options
+          .filter((option) => option.querySelector("input")?.checked)
+          .forEach((option, index) => {
+            const pill = [...pills.querySelectorAll(".selected-class-pill")][index];
+            if (!pill) return;
+            pill.classList.add("pill-settle");
+            window.setTimeout(() => pill.classList.remove("pill-settle"), 460 + index * 35);
+          });
       });
 
       document.addEventListener("click", (event) => {
