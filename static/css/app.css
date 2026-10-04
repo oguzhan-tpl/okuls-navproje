@@ -1611,3 +1611,58 @@ body:before{
 @media(prefers-reduced-motion:reduce){
   .class-chip-flight.is-flying{animation:none;opacity:.45}
 }
+
+
+/* =========================================================
+   CLASS PICKER FIX — escape section clipping + smooth motion
+   ========================================================= */
+.form-section:has(.class-picker-wrap){
+  overflow:visible;
+}
+.class-picker-wrap,
+.class-combobox{
+  position:relative;
+  z-index:20;
+}
+.class-combobox.is-open{
+  z-index:80;
+}
+.class-combobox-menu{
+  z-index:500;
+  will-change:opacity,transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transform:translate3d(0,0,0);
+}
+.class-option{
+  will-change:background-color,border-color;
+}
+.class-option-check{
+  will-change:transform,background-color,color;
+}
+.selected-class-pill{
+  will-change:transform,opacity;
+}
+.class-chip-flight{
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+@media(max-width:720px){
+  .form-section:has(.class-picker-wrap){
+    overflow:visible;
+  }
+  .class-picker-wrap{
+    z-index:100;
+  }
+  .class-combobox-menu{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 8px);
+    max-height:none;
+  }
+  .class-option-list{
+    max-height:min(48vh,360px);
+  }
+}
