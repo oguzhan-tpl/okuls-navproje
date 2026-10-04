@@ -280,13 +280,6 @@ def create_app():
             size /= 1024
         return "—"
 
-    @app.before_request
-    def security_and_csrf():
-        # CSRF token artık Flask session'ına bağlı değil. Böylece aynı hesabın
-        # birden fazla sekmesinde veya deploy/restart sonrasında eski form token'ı
-        # yüzünden gereksiz 400 hataları oluşmaz.
-        return None
-
     @app.after_request
     def security_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -516,7 +509,6 @@ def create_app():
 
             session.clear()
             session["user_id"] = user.id
-            session["_csrf"] = secrets.token_urlsafe(32)
             session.permanent = True
             user.last_login_at = utc_now()
             db.session.commit()
