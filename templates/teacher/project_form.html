@@ -3,7 +3,7 @@
 {% block kicker %}ÖĞRETMEN / YENİ PROJE{% endblock %}
 {% block heading %}Proje oluştur{% endblock %}
 {% block content %}
-<form class="form-stack" method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<form class="form-stack" method="post" data-loading data-loading-title="Proje oluşturuluyor" data-loading-text="Proje kaydediliyor ve yayın ayarları uygulanıyor."><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
 <div class="form-layout">
 <div class="form-section"><div class="form-section-title"><span class="step-badge">01</span><div><h2>Proje bilgileri</h2><p>Öğrencinin göreceği içeriği ve teslim koşullarını tanımlayın.</p></div></div>
 <div class="field-grid">
