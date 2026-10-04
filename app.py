@@ -387,6 +387,8 @@ def create_app():
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
+        if request.method == "GET" and request.args.get("role") == "chief":
+            return render_template("chief_login.html")
         if request.method == "POST":
             csrf_protect()
             role = request.form.get("role", "").strip()
