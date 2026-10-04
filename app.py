@@ -337,6 +337,17 @@ def create_app():
             response.headers["Pragma"] = "no-cache"
         return response
 
+    @app.after_request
+    def clear_database_retry_cookie(response):
+        if request.cookies.get("osp_db_retry") and response.status_code < 300:
+            response.delete_cookie(
+                "osp_db_retry",
+                path="/",
+                samesite="Lax",
+                secure=app.config.get("SESSION_COOKIE_SECURE", False),
+            )
+        return response
+
     @app.errorhandler(RequestEntityTooLarge)
     def too_large(_error):
         flash(
@@ -362,10 +373,29 @@ def create_app():
     @app.errorhandler(OperationalError)
     def database_error(_error):
         db.session.rollback()
+        db.session.remove()
+        try:
+            db.engine.dispose()
+        except Exception:
+            pass
+
+        if request.method in {"GET", "HEAD"} and not request.cookies.get("osp_db_retry"):
+            response = redirect(request.url, code=307)
+            response.set_cookie(
+                "osp_db_retry",
+                "1",
+                max_age=20,
+                httponly=True,
+                samesite="Lax",
+                secure=app.config.get("SESSION_COOKIE_SECURE", False),
+                path="/",
+            )
+            return response
+
         return render_template(
             "error.html",
             code=503,
-            message="Veri hizmeti şu anda geçici olarak kullanılamıyor.",
+            message="Veritabanı bağlantısı geçici olarak kesildi. Tekrar deneyin.",
         ), 503
 
     def csrf_serializer():
@@ -470,8 +500,19 @@ def create_app():
                 _db_last_error = None
                 app.logger.info("Database schema is ready.")
                 return True, None
+            except OperationalError as exc:
+                db.session.rollback()
+                db.session.remove()
+                try:
+                    db.engine.dispose()
+                except Exception:
+                    pass
+                _db_last_error = str(exc)
+                app.logger.warning("Database operation failed; connection pool reset.")
+                return False, _db_last_error
             except Exception as exc:
                 db.session.rollback()
+                db.session.remove()
                 _db_last_error = str(exc)
                 app.logger.exception("Database initialization failed.")
                 return False, _db_last_error
@@ -487,11 +528,24 @@ def create_app():
         if ready:
             return None
 
+        if request.method in {"GET", "HEAD"} and not request.cookies.get("osp_db_retry"):
+            response = redirect(request.url, code=307)
+            response.set_cookie(
+                "osp_db_retry",
+                "1",
+                max_age=20,
+                httponly=True,
+                samesite="Lax",
+                secure=app.config.get("SESSION_COOKIE_SECURE", False),
+                path="/",
+            )
+            return response
+
         return render_template(
             "error.html",
             code=503,
             message=(
-                "Veritabanı hazırlanamadı. Render/TiDB bağlantısını kontrol edin."
+                "Veritabanı bağlantısı geçici olarak kurulamadı."
             ),
             debug_message=error if app.debug else None,
         ), 503
