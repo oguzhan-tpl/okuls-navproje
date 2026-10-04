@@ -1,40 +1,9 @@
-<div class="student-page">
-  <section class="student-welcome">
-    <div>
-      <span class="eyebrow">AKTİF SINIF</span>
-      <h2>{{ current_user().classroom.name if current_user().classroom else 'Sınıf atanmadı' }}</h2>
-      <p>Merhaba {{ current_user().full_name }}. Size açılan projeler burada görünür.</p>
-    </div>
-  </section>
-  <section class="section-block">
-    <div class="section-head">
-      <div><span class="section-kicker">YAYINLANAN PROJELER</span><h2>Teslim listeniz</h2></div>
-      <span class="subtle">{{ projects|length }} aktif proje</span>
-    </div>
-    {% if projects %}
-    <div class="student-project-grid">
-      {% for project in projects %}
-        {% set submission = by_project.get(project.id) %}
-        <a class="student-project-card" href="{{ url_for('student_project_detail', project_id=project.id) }}">
-          <div class="card-top">
-            <span class="tag">{{ project.course or 'Proje' }}</span>
-            <span class="tag">{{ 'Teslim edildi' if submission else 'Teslim bekliyor' }}</span>
-          </div>
-          <h3>{{ project.title }}</h3>
-          <p>{{ project.description|truncate(140) }}</p>
-          <div class="card-foot">
-            <span>{{ project.deadline|dt if project.deadline else 'Süresiz' }}</span>
-            <strong>Detayı aç →</strong>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state">
-      <span class="eyebrow">GÜNCEL PROJE YOK</span>
-      <h3>Size atanmış yayınlanmış proje bulunmuyor.</h3>
-      <p>Öğretmeniniz proje yayınladığında burada görünecek.</p>
-    </div>
-    {% endif %}
-  </section>
-</div>
+{% extends "base.html" %}
+{% block title %}Öğrenci · Projelerim{% endblock %}
+{% block kicker %}ÖĞRENCİ / ÇALIŞMA ALANI{% endblock %}
+{% block heading %}Projelerim{% endblock %}
+{% block content %}
+<section class="student-welcome"><div><span class="eyebrow">ÖĞRENCİ ÇALIŞMA ALANI</span><h2>{{ current_user().full_name }}</h2><p>{{ current_user().classroom.name if current_user().classroom else 'Sınıf ataması bekleniyor' }} · Yayınlanan bütün projeler burada listelenir.</p></div><div class="student-number"><span>ÖĞRENCİ NUMARASI</span><strong>{{ current_user().student_no or '—' }}</strong></div></section>
+<section class="metric-grid"><div class="metric accent"><div class="metric-head"><span class="metric-label">AKTİF PROJE</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4zM8 6V4h8v2"/></svg></span></div><strong>{{ projects|length }}</strong><small>Yayınlanmış projeler</small></div><div class="metric success"><div class="metric-head"><span class="metric-label">TESLİM EDİLDİ</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></div><strong>{{ by_project|length }}</strong><small>Gönderilmiş dosyalar</small></div><div class="metric warning"><div class="metric-head"><span class="metric-label">BEKLEYEN</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg></span></div><strong>{{ projects|length-by_project|length if projects|length>by_project|length else 0 }}</strong><small>Henüz teslim edilmemiş</small></div></section>
+<section class="section-block"><div class="section-head"><div><span class="section-kicker">YAYINLANAN ÇALIŞMALAR</span><h2>Proje listesi</h2></div><span class="subtle">{{ projects|length }} aktif proje</span></div>{% if projects %}<div class="project-grid">{% for project in projects %}{% set submission=by_project.get(project.id) %}<a class="project-card" href="{{ url_for('student_project_detail',project_id=project.id) }}"><div class="project-card-top"><span class="project-index">{{ "%02d"|format(loop.index) }}</span><span class="tag {{ 'tag-green' if submission else 'tag-orange' }}">{{ 'TESLİM EDİLDİ' if submission else 'TESLİM BEKLİYOR' }}</span></div><h3>{{ project.title }}</h3><p>{{ project.description|truncate(145) }}</p><div class="project-card-foot"><span>{{ project.deadline|dt if project.deadline else 'Süresiz' }}</span><strong>Detayı aç →</strong></div></a>{% endfor %}</div>{% else %}<div class="empty-state"><div class="empty-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4z"/></svg></div><h3>Şimdilik yayınlanmış proje yok.</h3><p>Öğretmen yeni bir proje yayınladığında burada otomatik olarak görünecek.</p></div>{% endif %}</section>
+{% endblock %}
