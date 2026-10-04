@@ -1,0 +1,22 @@
+{% extends "auth_base.html" %}
+{% block title %}Alan Şefi · Giriş{% endblock %}
+{% block content %}
+<main class="chief-auth">
+  <section class="chief-auth-card">
+    <div class="auth-topline"><span class="brand-mark">OSP</span><span>ALAN ŞEFİ ERİŞİMİ</span></div>
+    <div class="chief-auth-copy">
+      <span class="eyebrow">YÖNETİM GİRİŞİ</span>
+      <h1>Sistemi<br><strong>yönet.</strong></h1>
+      <p>Öğretmen ve öğrenci hesaplarını, sınıfları ve proje hareketlerini buradan yönetebilirsiniz.</p>
+    </div>
+    <form class="auth-form chief-form" method="post" action="{{ url_for('login') }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="role" value="chief">
+      <label><span>Kullanıcı adı</span><input name="username" autocomplete="username" required></label>
+      <label><span>Şifre</span><input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="button button-light" type="submit">Alan şefi girişi →</button>
+    </form>
+    <a class="back-login" href="{{ url_for('home') }}">← Öğretmen / öğrenci girişine dön</a>
+  </section>
+</main>
+{% endblock %}
