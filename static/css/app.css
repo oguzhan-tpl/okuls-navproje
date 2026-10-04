@@ -1666,3 +1666,162 @@ body:before{
     max-height:min(48vh,360px);
   }
 }
+
+/* =========================================================
+   CLASS SELECTION — SPHERE FLIGHT / HEADER MORPH
+   ========================================================= */
+
+.project-form-title{
+  min-width:0;
+}
+
+.selected-class-pills{
+  margin-left:auto;
+  max-width:min(62%,760px);
+  flex:0 1 auto;
+  min-width:0;
+  align-self:center;
+  justify-content:flex-end;
+  align-items:center;
+  gap:5px;
+  overflow:visible;
+}
+
+.selected-class-pill{
+  min-height:28px;
+  opacity:1;
+  transform-origin:center;
+  will-change:transform,opacity;
+}
+
+.selected-class-pill.pill-awaiting{
+  opacity:0;
+  pointer-events:none;
+}
+
+.selected-class-pill.pill-settle{
+  animation:class-pill-settle .42s cubic-bezier(.18,.9,.28,1.2) both;
+}
+
+.class-chip-arrival-slot{
+  width:3px;
+  height:26px;
+  flex:0 0 3px;
+  opacity:0;
+  pointer-events:none;
+}
+
+.class-selection-sphere{
+  position:fixed;
+  z-index:10050;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate3d(0,0,0) scale(1);
+  opacity:1;
+  background:
+    radial-gradient(circle at 32% 28%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,.22) 10% 18%,transparent 19%),
+    radial-gradient(circle at 64% 68%,#8f5960 0%,#7a2f35 48%,#5f242a 100%);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:
+    0 12px 26px rgba(82,35,40,.22),
+    0 0 0 6px rgba(122,47,53,.08),
+    inset -5px -6px 10px rgba(44,19,22,.2);
+  will-change:transform,opacity,filter;
+}
+
+.class-selection-sphere.is-flying{
+  animation:class-selection-sphere-flight .68s cubic-bezier(.18,.88,.24,1) both;
+}
+
+@keyframes class-selection-sphere-flight{
+  0%{
+    opacity:1;
+    filter:blur(0);
+    transform:translate3d(0,0,0) scale(1);
+  }
+  12%{
+    transform:translate3d(0,-13px,0) scale(1.06);
+  }
+  30%{
+    transform:translate3d(calc(var(--fly-x) * .05),-42px,0) scale(.98);
+  }
+  52%{
+    transform:translate3d(calc(var(--fly-x) * .28),-53px,0) scale(.9);
+  }
+  76%{
+    opacity:.92;
+    transform:translate3d(calc(var(--fly-x) * .74),calc(var(--fly-y) * .82 - 28px),0) scale(.68);
+  }
+  100%{
+    opacity:.16;
+    filter:blur(.35px);
+    transform:translate3d(var(--fly-x),var(--fly-y),0) scale(.28);
+  }
+}
+
+@keyframes class-pill-settle{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) scale(.72);
+    filter:blur(1px);
+  }
+  55%{
+    opacity:1;
+    transform:translate3d(0,-1px,0) scale(1.055);
+    filter:blur(0);
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+  }
+}
+
+@media(max-width:720px){
+  .project-form-title{
+    flex-wrap:wrap;
+  }
+
+  .project-title-copy{
+    min-width:135px;
+    flex:1 1 auto;
+  }
+
+  .selected-class-pills{
+    width:auto;
+    max-width:calc(100% - 150px);
+    margin-left:auto;
+    padding-left:0;
+    order:initial;
+    flex:0 1 auto;
+    justify-content:flex-end;
+    overflow:visible;
+  }
+
+  .selected-class-pill{
+    min-height:27px;
+    padding-right:8px;
+    padding-left:7px;
+  }
+
+  .selected-class-pill strong{
+    font-size:7px;
+  }
+
+  .class-selection-sphere{
+    width:29px;
+    height:29px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .selected-class-pill.pill-settle,
+  .class-selection-sphere.is-flying{
+    animation:none;
+  }
+
+  .class-selection-sphere.is-flying{
+    opacity:.16;
+  }
+}
