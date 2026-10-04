@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>{% block title %}Okul Sınav Proje{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="app-body">
+  <header class="mobile-header">
+    <div class="brand-inline"><span class="brand-mark">OSP</span><span>OKUL SINAV PROJE</span></div>
+    <button class="icon-button" data-sidebar-toggle aria-label="Menüyü aç">☰</button>
+  </header>
+
+  <div class="app-frame">
+    <aside class="sidebar" data-sidebar>
+      <div class="sidebar-brand">
+        <span class="brand-mark">OSP</span>
+        <div>
+          <strong>Okul Sınav</strong>
+          <span>Proje Yönetimi</span>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="user-role">{{ {'chief':'ALAN ŞEFİ','teacher':'ÖĞRETMEN','student':'ÖĞRENCİ'}[current_user().role] }}</span>
+        <strong>{{ current_user().full_name }}</strong>
+        <small>{{ current_user().classroom.name if current_user().classroom else current_user().username }}</small>
+      </div>
+
+      <nav class="sidebar-nav">
+        {% if current_user().role == 'chief' %}
+          <a href="{{ url_for('chief_dashboard') }}" class="{{ 'active' if request.endpoint == 'chief_dashboard' else '' }}">Genel bakış</a>
+          <a href="{{ url_for('chief_users') }}" class="{{ 'active' if request.endpoint == 'chief_users' else '' }}">Hesaplar</a>
+          <a href="{{ url_for('chief_classes') }}" class="{{ 'active' if request.endpoint == 'chief_classes' else '' }}">Sınıflar</a>
+          <a href="{{ url_for('chief_projects') }}" class="{{ 'active' if request.endpoint == 'chief_projects' else '' }}">Projeler</a>
+        {% elif current_user().role == 'teacher' %}
+          <a href="{{ url_for('teacher_dashboard') }}" class="{{ 'active' if request.endpoint == 'teacher_dashboard' else '' }}">Projeler</a>
+          <a href="{{ url_for('teacher_create_project') }}" class="{{ 'active' if request.endpoint == 'teacher_create_project' else '' }}">Yeni proje</a>
+        {% else %}
+          <a href="{{ url_for('student_dashboard') }}" class="{{ 'active' if request.endpoint == 'student_dashboard' else '' }}">Projelerim</a>
+        {% endif %}
+      </nav>
+
+      <form method="post" action="{{ url_for('logout') }}" class="sidebar-logout">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button type="submit">Çıkış yap <span>→</span></button>
+      </form>
+    </aside>
+
+    <main class="main-area">
+      <div class="page-topbar">
+        <div>
+          <span class="page-kicker">{% block kicker %}YÖNETİM{% endblock %}</span>
+          <h1>{% block heading %}Okul Sınav Proje{% endblock %}</h1>
+        </div>
+        {% block page_action %}{% endblock %}
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
