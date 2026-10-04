@@ -159,7 +159,6 @@
     document.addEventListener("submit", (event) => {
       const form = event.target;
       if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
-      if (form.dataset.confirm && !event.defaultPrevented) return;
       if ((form.method || "get").toLowerCase() !== "get") {
         startNavigation(form.action || window.location.href);
       }
