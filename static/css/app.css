@@ -1835,7 +1835,7 @@ body:before{
   min-width:34px;
   min-height:34px;
   border-radius:50% !important;
-  opacity:1 !important;
+  opacity:1;
   pointer-events:none !important;
   z-index:2147483000 !important;
   transform:translate3d(0,0,0) scale(1);
@@ -1851,7 +1851,7 @@ body:before{
   contain:layout paint;
 }
 .class-selection-sphere.is-flying{
-  animation:none !important;
+  animation:none;
 }
 .selected-class-pill.pill-awaiting{
   opacity:0 !important;
