@@ -495,6 +495,14 @@ def create_app():
             return {"status": "ready", "database": "ok"}, 200
         return {"status": "not_ready", "database": "error", "message": error}, 503
 
+    # Veritabanı hazırlığını ilk gerçek sayfa isteğine bırakma. Worker açılır
+    # açılmaz arka planda başlat; Render health check yine beklemeden cevap alır.
+    threading.Thread(
+        target=ensure_database,
+        name="osp-db-warmup",
+        daemon=True,
+    ).start()
+
     @app.route("/", methods=["GET"])
     def home():
         user = get_current_user()
