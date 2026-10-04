@@ -242,8 +242,32 @@ def display_local_datetime(value):
 
 def create_app():
     app = Flask(__name__)
+    configured_secret = (os.getenv("SECRET_KEY") or "").strip()
+    if configured_secret:
+        session_secret = configured_secret
+    else:
+        # Render'da SECRET_KEY tanımlı değilse rastgele anahtar üretmek,
+        # container her yeniden başladığında mevcut oturumları düşürür.
+        # Bu fallback yalnızca eski/eksik Render kurulumlarını kurtarmak için
+        # veritabanı bağlantısının sunucu adı + kullanıcı + veritabanı kısmından
+        # kararlı bir anahtar üretir.
+        db_identity = urlsplit(os.getenv("DATABASE_URL", "") or "")._replace(
+            password=None,
+            query="",
+            fragment="",
+        )
+        fallback_material = (
+            "okuls-navproje-session-v2|"
+            f"{db_identity.scheme}|{db_identity.username}|"
+            f"{db_identity.hostname}|{db_identity.port}|{db_identity.path}"
+        )
+        session_secret = hashlib.sha256(
+            fallback_material.encode("utf-8")
+        ).hexdigest()
+        app_secret_warning = True
+
     app.config.update(
-        SECRET_KEY=os.getenv("SECRET_KEY") or secrets.token_hex(32),
+        SECRET_KEY=session_secret,
         SQLALCHEMY_DATABASE_URI=normalize_db_url(os.getenv("DATABASE_URL", "")),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_ENGINE_OPTIONS={
@@ -258,12 +282,20 @@ def create_app():
             },
         },
         MAX_CONTENT_LENGTH=int(os.getenv("MAX_UPLOAD_MB", "16")) * 1024 * 1024,
+        SESSION_COOKIE_NAME="osp_session",
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=os.getenv("COOKIE_SECURE", "false").lower() == "true",
-        PERMANENT_SESSION_LIFETIME=60 * 60 * 12,
+        SESSION_COOKIE_PATH="/",
+        SESSION_REFRESH_EACH_REQUEST=True,
+        PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 30,
     )
     db.init_app(app)
+    if "app_secret_warning" in locals():
+        app.logger.warning(
+            "SECRET_KEY is missing. A deterministic fallback is active; "
+            "set Render SECRET_KEY to a persistent generated value."
+        )
 
     @app.template_filter("dt")
     def format_datetime(value):
