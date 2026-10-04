@@ -51,7 +51,7 @@
               <div class="student-cell"><strong>{{ item.student.full_name }}</strong><small>{{ item.student.student_no or item.student.username }}</small></div>
               <div class="submission-status">
                 {% if item.submission %}
-                  <span class="tag {{ 'tag-green' if item.submission.review_status == 'reviewed' else 'tag-orange' }}">{{ 'İNCE LENDİ' if item.submission.review_status == 'reviewed' else 'BEKLİYOR' }}</span>
+                  <span class="tag {{ 'tag-green' if item.submission.review_status == 'reviewed' else 'tag-orange' }}">{{ 'İNCELENDİ' if item.submission.review_status == 'reviewed' else 'BEKLİYOR' }}</span>
                   <small>{{ item.submission.updated_at|dt }} · {{ item.submission.file_size|filesize }}</small>
                 {% else %}
                   <span class="tag tag-neutral">TESLİM YOK</span>
