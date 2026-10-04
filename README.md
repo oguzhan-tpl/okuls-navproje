@@ -6,6 +6,8 @@ Okul içindeki proje dağıtım ve teslim sürecini tek panelde yöneten Flask +
 
 ### Alan şefi
 - Öğretmen ve öğrenci hesabı oluşturur.
+- Öğretmen hesapları sınıfa bağlanmaz.
+- Öğrenci hesabını ilgili sınıfa bağlar.
 - Hesapları aktifleştirir veya pasifleştirir.
 - Öğrenci şifrelerini yeniler.
 - 9, 10, 11 ve 12. sınıf / şube kayıtlarını yönetir.
@@ -14,7 +16,7 @@ Okul içindeki proje dağıtım ve teslim sürecini tek panelde yöneten Flask +
 ### Öğretmen
 - Proje oluşturur.
 - Ders, açıklama, gereksinim ve teslim tarihi tanımlar.
-- Bir veya birden fazla sınıf seçer.
+- Sınıf seçmez; projeler tüm aktif öğrencilere açıktır.
 - Projeyi taslak olarak saklar veya yayınlar.
 - Teslimleri sınıf sınıf ve öğrenci öğrenci görür.
 - Teslim dosyasını indirir.
@@ -22,7 +24,7 @@ Okul içindeki proje dağıtım ve teslim sürecini tek panelde yöneten Flask +
 - Projeyi arşivleyebilir.
 
 ### Öğrenci
-- Sadece kendi sınıfına açılan yayınlanmış projeleri görür.
+- Yayınlanmış tüm global projeleri görür.
 - Proje açıklamasını ve son teslim tarihini görür.
 - Dosyasını yükler.
 - Teslim notu ekler.
@@ -35,7 +37,6 @@ Okul içindeki proje dağıtım ve teslim sürecini tek panelde yöneten Flask +
 - users: hesap, rol, öğrenci numarası ve sınıf ilişkisi
 - classrooms: sınıf ve şube kayıtları
 - projects: öğretmen tarafından oluşturulan proje
-- project_classes: proje ile hedef sınıflar arasındaki ilişki
 - submissions: öğrenci teslimi, dosya içeriği ve inceleme durumu
 
 Teslim dosyaları Render'ın geçici dosya sistemine bırakılmaz. TiDB bağlantısında `sys` gibi sistem şemaları kullanılmaz; eski bir `/sys` bağlantısı gelirse uygulama otomatik olarak `/test` veritabanına yönlendirir. Dosya içeriği TiDB içinde MEDIUMBLOB olarak saklanır. Varsayılan yükleme sınırı 16 MB'dır.
@@ -125,3 +126,7 @@ templates/
   student/
   chief/
 .github/workflows/quality.yml
+
+## Proje yayın mantığı
+
+Öğretmenler için sınıf ataması bulunmaz. Bir öğretmen projeyi yayınladığında proje, aktif durumdaki tüm öğrenci hesaplarına otomatik olarak görünür. Öğrencinin sınıf bilgisi yalnızca Alan Şefi tarafından öğrenci hesabı oluşturulurken yönetilir. Öğretmen teslim ekranında öğrencileri kendi sınıfları altında takip eder.
