@@ -100,3 +100,305 @@
   .form-actions{grid-template-columns:1fr}
   .form-actions .button{min-height:43px}
 }
+
+
+/* =========================================================
+   OSP / Editorial Campus UI — floating shell
+   A quieter, distinctive visual language: graphite + paper + olive.
+   ========================================================= */
+:root{
+  --bg:#e8e7e2;
+  --card:#fbfaf7;
+  --soft:#f1f0eb;
+  --ink:#20231f;
+  --muted:#777a73;
+  --line:#deddd5;
+  --nav:#252823;
+  --nav2:#2c3029;
+  --blue:#687552;
+  --blueSoft:#edf0e8;
+  --green:#5e765e;
+  --greenSoft:#edf3ed;
+  --amber:#9b7650;
+  --amberSoft:#f6efe6;
+  --red:#9b5d5d;
+  --redSoft:#f7ecec;
+  --shadow:0 18px 45px rgba(34,37,32,.075);
+}
+body{
+  background:
+    radial-gradient(circle at 8% 8%,rgba(255,255,255,.58),transparent 25%),
+    #e8e7e2;
+  color:var(--ink);
+}
+.app-frame{min-height:100vh}
+
+/* Desktop shell: deliberately detached from the viewport edge. */
+.sidebar{
+  left:18px;
+  top:18px;
+  bottom:18px;
+  width:252px;
+  height:auto;
+  padding:18px 14px 14px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:23px;
+  background:linear-gradient(180deg,#282c26 0%,#232620 100%);
+  box-shadow:0 20px 55px rgba(30,33,28,.18),0 2px 5px rgba(30,33,28,.08);
+  overflow:hidden;
+}
+.sidebar:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:23px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.sidebar-brand{
+  padding:4px 7px 18px;
+  border-bottom-color:rgba(255,255,255,.075);
+}
+.brand-mark{
+  width:39px;height:39px;border-radius:12px;
+  background:#343a31;border-color:rgba(255,255,255,.09);
+}
+.sidebar-user{
+  margin:15px 0 12px;
+  padding:12px;
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.075);
+}
+.user-role{color:#b9c39f}
+.user-avatar{background:#3a4036;border-radius:11px}
+.sidebar-nav{gap:3px}
+.sidebar-nav a{
+  min-height:43px;
+  border-radius:12px;
+  padding:0 12px;
+  color:#aeb3aa;
+}
+.sidebar-nav a:hover{background:rgba(255,255,255,.055)}
+.sidebar-nav a.active{
+  background:#343931;
+  border-color:rgba(255,255,255,.075);
+  color:#fff;
+  box-shadow:inset 3px 0 0 #aeb99a;
+}
+.sidebar-nav a.active .nav-icon{color:#c3ccb0}
+.sidebar-logout button{border-radius:12px}
+
+/* Main content has a visible breathing channel between it and the shell. */
+.main-area{
+  margin-left:288px;
+  padding:28px 34px 56px;
+}
+.page-topbar{
+  margin-bottom:20px;
+}
+.page-heading{gap:13px}
+.page-symbol{
+  width:43px;height:43px;
+  border-radius:14px;
+  background:rgba(251,250,247,.84);
+  border-color:#d9d8d0;
+  box-shadow:0 7px 22px rgba(38,40,34,.055);
+  color:#687552;
+}
+.page-kicker{color:#8a8c84}
+.page-topbar h1{
+  font-size:29px;
+  letter-spacing:-.045em;
+}
+.topbar-user{
+  border-color:#d9d8d0;
+  background:#fbfaf7;
+  color:#60655c;
+  box-shadow:0 5px 18px rgba(38,40,34,.04);
+}
+.topbar-user span{background:#edf0e8;color:#687552}
+
+/* Remove the typical "AI dashboard" blue gradient treatment. */
+.hero{
+  min-height:184px;
+  padding:27px 29px;
+  border-radius:22px;
+  background:#292d27;
+  box-shadow:0 20px 48px rgba(33,36,31,.12);
+}
+.hero:after{
+  width:300px;height:300px;
+  right:-125px;top:-165px;
+  border-color:rgba(190,201,168,.11);
+}
+.hero .eyebrow{color:#bac49f}
+.hero h2{font-size:38px}
+.hero p{color:#adb2a9}
+.hero-chip{
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.09);
+}
+.global-badge{
+  background:#edf3ed;
+  color:#557057;
+  border-color:#d3e0d3;
+}
+.global-dot{background:#6b866c}
+
+.metric-grid{gap:12px}
+.metric{
+  border-radius:15px;
+  border-color:#dcdad2;
+  background:#fbfaf7;
+  box-shadow:0 9px 28px rgba(36,39,34,.045);
+}
+.metric:before{background:#d9d8d0}
+.metric.accent:before{background:#7a8567}
+.metric-icon{
+  background:#f0f0ea;
+  color:#68715f;
+}
+
+.section-block{
+  border-radius:18px;
+  border-color:#dcdad2;
+  background:#fbfaf7;
+  box-shadow:0 10px 32px rgba(36,39,34,.045);
+}
+.section-head{
+  min-height:63px;
+  border-bottom-color:#e8e6df;
+}
+.section-kicker{color:#8a8b83}
+.button{
+  border-radius:11px;
+  min-height:39px;
+}
+.button-primary{
+  background:#687552;
+  box-shadow:0 5px 14px rgba(104,117,82,.18);
+}
+.button-primary:hover{background:#5d694a}
+.button-dark{background:#292d27}
+.button-ghost{background:#fbfaf7;border-color:#d6d5cd}
+
+.project-grid{gap:12px}
+.project-card{
+  border-color:#dfddd6;
+  border-radius:16px;
+  background:#fbfaf7;
+  min-height:202px;
+}
+.project-card:hover{
+  border-color:#c8c9bf;
+  box-shadow:0 13px 28px rgba(34,37,31,.07);
+  transform:translateY(-1px);
+}
+.project-index{
+  border-radius:10px;
+  background:#edf0e8;
+  color:#687552;
+}
+
+.form-section,.detail-head,.rail-block{
+  border-color:#dddcd4;
+  border-radius:16px;
+  background:#fbfaf7;
+}
+.field input,.field select,.field textarea{
+  border-color:#d8d7cf;
+  background:#f8f7f3;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:#8b9678;
+  box-shadow:0 0 0 3px #edf0e8;
+}
+.publish-note{
+  background:#f4f5ef;
+  border-color:#dce1d4;
+}
+.publish-note .icon-box,.step-badge{
+  background:#e9ede2;
+  color:#687552;
+}
+.scope-banner{
+  background:#eff3ed;
+  border-color:#d7e1d5;
+  color:#59705b;
+}
+.switch input:checked+span{background:#687552}
+
+.detail-summary,.staff-hero,.student-welcome{
+  background:#292d27;
+  border-radius:18px;
+}
+.detail-head{box-shadow:0 10px 30px rgba(36,39,34,.045)}
+.class-group{
+  border-color:#deddd5;
+  border-radius:14px;
+}
+.class-group-head{
+  background:#f1f0eb;
+  border-bottom-color:#deddd5;
+}
+.class-code{
+  background:#edf0e8;
+  color:#687552;
+}
+.current-submission,.submission-note,.teacher-feedback,.audit-description{
+  background:#f5f4ef;
+  border-color:#dddcd4;
+}
+.file-symbol,.upload-icon,.rail-icon,.quick-icon,.avatar-letter,.class-badge{
+  background:#eef0ea;
+  border-color:#dfe1d8;
+  color:#687552;
+}
+.file-drop{
+  border-color:#c8c9bf;
+  background:#f8f7f3;
+}
+.tag-green{background:#edf3ed;border-color:#d3e0d3;color:#557057}
+
+/* Cleaner tables/lists without the dense admin-panel look. */
+.account-row,.submission-row,.audit-submission{
+  border-bottom-color:#e9e7df;
+}
+.account-row:hover{background:#f8f7f3}
+.account-tools button{
+  background:#f3f2ed;
+  border-color:#d9d8d0;
+}
+
+/* Desktop gets a little more air; medium screens retain the detached shell. */
+@media (min-width:1051px){
+  .page-topbar,.page-wrap,.flash-stack{max-width:1480px}
+}
+@media (max-width:1050px) and (min-width:721px){
+  .sidebar{left:14px;top:14px;bottom:14px;width:220px}
+  .main-area{margin-left:248px;padding:22px 22px 44px}
+}
+
+/* Mobile: keep the same visual language, but the drawer remains full-height. */
+@media (max-width:720px){
+  .sidebar{
+    left:0;top:0;bottom:0;
+    width:292px;
+    border-radius:0 23px 23px 0;
+    border-left:0;
+  }
+  .main-area{
+    margin-left:0;
+    padding:16px 11px calc(30px + env(safe-area-inset-bottom));
+  }
+  .mobile-header{
+    background:rgba(251,250,247,.94);
+    border-bottom-color:#deddd5;
+    backdrop-filter:blur(14px);
+  }
+  .mobile-header .brand-mark{background:#292d27}
+  .icon-button{background:#fbfaf7;border-color:#d9d8d0}
+  .hero{border-radius:17px}
+  .section-block,.metric,.project-card,.detail-head{box-shadow:0 7px 24px rgba(36,39,34,.04)}
+}
