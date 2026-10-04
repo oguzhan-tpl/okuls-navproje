@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} · Öğretmen{% endblock %}
+{% block kicker %}PROJE DETAYI{% endblock %}
+{% block heading %}{{ project.title }}{% endblock %}
+{% block page_action %}
+<div class="action-cluster">
+  <form method="post" action="{{ url_for('teacher_project_toggle', project_id=project.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="button {{ 'button-dark' if not project.published else 'button-ghost' }} compact" type="submit">{{ 'Yayınla' if not project.published else 'Yayından kaldır' }}</button>
+  </form>
+  {% if not project.archived %}
+  <form method="post" action="{{ url_for('teacher_project_archive', project_id=project.id) }}" data-confirm="Bu projeyi arşive almak istediğinize emin misiniz?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="button button-ghost compact" type="submit">Arşivle</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+<section class="detail-head">
+  <div class="detail-tags">
+    <span class="tag {{ 'tag-green' if project.published else 'tag-neutral' }}">{{ 'YAYINDA' if project.published else 'TASLAK' }}</span>
+    {% if project.deadline %}<span class="tag">SON: {{ project.deadline|dt }}</span>{% endif %}
+    {% if project.course %}<span class="tag">{{ project.course }}</span>{% endif %}
+  </div>
+  <p class="detail-description">{{ project.description }}</p>
+  {% if project.requirements %}<div class="requirements"><span class="section-kicker">GEREKSİNİMLER</span><p>{{ project.requirements }}</p></div>{% endif %}
+</section>
+
+<section class="metric-grid">
+  <div class="metric"><span>SEÇİLEN SINIF</span><strong>{{ project.classes|length }}</strong><small>{{ project.classes|map(attribute='name')|join(', ') }}</small></div>
+  <div class="metric"><span>AKTİF ÖĞRENCİ</span><strong>{{ total_students }}</strong><small>Seçilen sınıflarda</small></div>
+  <div class="metric"><span>TESLİM</span><strong>{{ submitted }}</strong><small>Dosya gönderen öğrenci</small></div>
+</section>
+
+<section class="section-block">
+  <div class="section-head">
+    <div><span class="section-kicker">SINIF SINIF TAKİP</span><h2>Öğrenci teslimleri</h2></div>
+  </div>
+
+  {% for group in grouped %}
+    <div class="class-group">
+      <div class="class-group-head">
+        <div><span class="class-code">{{ group.classroom.name }}</span><strong>{{ group.students|length }} öğrenci</strong></div>
+        <span>{{ group.students|selectattr('submission')|list|length }} teslim</span>
+      </div>
+      {% if group.students %}
+        <div class="submission-table">
+          {% for item in group.students %}
+            <div class="submission-row">
+              <div class="student-cell"><strong>{{ item.student.full_name }}</strong><small>{{ item.student.student_no or item.student.username }}</small></div>
+              <div class="submission-status">
+                {% if item.submission %}
+                  <span class="tag {{ 'tag-green' if item.submission.review_status == 'reviewed' else 'tag-orange' }}">{{ 'İNCE LENDİ' if item.submission.review_status == 'reviewed' else 'BEKLİYOR' }}</span>
+                  <small>{{ item.submission.updated_at|dt }} · {{ item.submission.file_size|filesize }}</small>
+                {% else %}
+                  <span class="tag tag-neutral">TESLİM YOK</span>
+                {% endif %}
+              </div>
+              <div class="submission-actions">
+                {% if item.submission %}
+                  <a class="icon-link" href="{{ url_for('teacher_download_submission', submission_id=item.submission.id) }}">Dosyayı indir →</a>
+                  <details class="review-details">
+                    <summary>İncele</summary>
+                    <form method="post" action="{{ url_for('teacher_review_submission', submission_id=item.submission.id) }}">
+                      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                      <select name="review_status">
+                        <option value="pending" {{ 'selected' if item.submission.review_status == 'pending' else '' }}>Bekliyor</option>
+                        <option value="reviewed" {{ 'selected' if item.submission.review_status == 'reviewed' else '' }}>İncelendi</option>
+                      </select>
+                      <textarea name="teacher_note" rows="3" placeholder="Öğretmen notu...">{{ item.submission.teacher_note or '' }}</textarea>
+                      <button class="button button-dark compact" type="submit">Kaydet</button>
+                    </form>
+                  </details>
+                {% else %}
+                  <span class="subtle">Henüz gönderim yok</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="class-empty">Bu sınıfta henüz öğrenci hesabı bulunmuyor.</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}
