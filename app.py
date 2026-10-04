@@ -251,11 +251,7 @@ def create_app():
         # Bu fallback yalnızca eski/eksik Render kurulumlarını kurtarmak için
         # veritabanı bağlantısının sunucu adı + kullanıcı + veritabanı kısmından
         # kararlı bir anahtar üretir.
-        db_identity = urlsplit(os.getenv("DATABASE_URL", "") or "")._replace(
-            password=None,
-            query="",
-            fragment="",
-        )
+        db_identity = urlsplit(os.getenv("DATABASE_URL", "") or "")
         fallback_material = (
             "okuls-navproje-session-v2|"
             f"{db_identity.scheme}|{db_identity.username}|"
