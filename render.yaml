@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: okuls-navproje
+    runtime: python
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 2 --timeout 120 app:app
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BOOTSTRAP_CHIEF_USERNAME
+        sync: false
+      - key: BOOTSTRAP_CHIEF_PASSWORD
+        sync: false
+      - key: BOOTSTRAP_CHIEF_NAME
+        value: Alan Şefi
+      - key: MAX_UPLOAD_MB
+        value: "16"
+      - key: DB_POOL_SIZE
+        value: "3"
+      - key: DB_MAX_OVERFLOW
+        value: "2"
+      - key: COOKIE_SECURE
+        value: "true"
