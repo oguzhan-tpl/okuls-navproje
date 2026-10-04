@@ -14,7 +14,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, select, text
 from sqlalchemy.dialects.mysql import MEDIUMBLOB
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -323,6 +323,15 @@ def create_app():
             code=500,
             message="Sunucu tarafında beklenmeyen bir hata oluştu.",
         ), 500
+
+    @app.errorhandler(OperationalError)
+    def database_error(_error):
+        db.session.rollback()
+        return render_template(
+            "error.html",
+            code=503,
+            message="Veri hizmeti şu anda geçici olarak kullanılamıyor.",
+        ), 503
 
     def csrf_protect():
         token = request.form.get("_csrf") or request.headers.get("X-CSRF-Token")
@@ -861,6 +870,89 @@ def create_app():
             recent_projects=recent_projects,
         )
 
+    @app.get("/chief/teachers/<int:user_id>")
+    @login_required("chief")
+    def chief_teacher_detail(user_id):
+        teacher = db.session.get(User, user_id)
+        if not teacher or teacher.role != "teacher":
+            abort(404)
+
+        projects = (
+            Project.query
+            .filter(Project.teacher_id == teacher.id)
+            .order_by(Project.created_at.desc())
+            .all()
+        )
+        submissions = (
+            Submission.query
+            .join(Project, Submission.project_id == Project.id)
+            .filter(Project.teacher_id == teacher.id)
+            .order_by(Submission.submitted_at.desc())
+            .all()
+        )
+
+        per_project = {}
+        for project in projects:
+            per_project[project.id] = {
+                "project": project,
+                "submissions": [s for s in submissions if s.project_id == project.id],
+            }
+
+        stats = {
+            "projects": len(projects),
+            "published": sum(1 for p in projects if p.published and not p.archived),
+            "submissions": len(submissions),
+            "students": len({s.student_id for s in submissions}),
+        }
+        return render_template(
+            "chief/teacher_detail.html",
+            teacher=teacher,
+            projects=projects,
+            submissions=submissions,
+            per_project=per_project,
+            stats=stats,
+        )
+
+    @app.get("/chief/submissions/<int:submission_id>/download")
+    @login_required("chief")
+    def chief_download_submission(submission_id):
+        submission = db.session.get(Submission, submission_id)
+        if not submission:
+            abort(404)
+        return send_submission_file(submission)
+
+    @app.post("/chief/users/<int:user_id>/delete")
+    @login_required("chief")
+    def chief_delete_user(user_id):
+        csrf_protect()
+        user = db.session.get(User, user_id)
+        if not user or user.role != "teacher":
+            abort(404)
+
+        project_count = db.session.scalar(
+            select(func.count(Project.id)).where(Project.teacher_id == user.id)
+        ) or 0
+
+        # Teacher deletion is intentionally destructive only for that teacher's
+        # projects/submissions. It never touches other teachers, students or classes.
+        projects = Project.query.filter(Project.teacher_id == user.id).all()
+        for project in projects:
+            for submission in Submission.query.filter_by(project_id=project.id).all():
+                db.session.delete(submission)
+            db.session.delete(project)
+
+        db.session.delete(user)
+        try:
+            db.session.commit()
+            flash(
+                f"{user.full_name} hesabı ve kendisine ait {project_count} proje silindi.",
+                "success",
+            )
+        except Exception:
+            db.session.rollback()
+            flash("Öğretmen hesabı silinemedi; veri değişikliği geri alındı.", "error")
+        return redirect(url_for("chief_users"))
+
     @app.route("/chief/users", methods=["GET", "POST"])
     @login_required("chief")
     def chief_users():
@@ -1022,7 +1114,10 @@ def create_app():
         return app.config["MAX_CONTENT_LENGTH"]
 
     with app.app_context():
-        ensure_bootstrap()
+        try:
+            ensure_bootstrap()
+        except Exception as exc:
+            app.logger.exception("Database initialization is unavailable: %s", exc)
 
     return app
 
