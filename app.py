@@ -614,9 +614,17 @@ def create_app():
     @app.route("/teacher/projects/new", methods=["GET", "POST"])
     @login_required("teacher")
     def teacher_create_project():
+        classrooms = (
+            Classroom.query
+            .filter_by(active=True)
+            .order_by(Classroom.grade, Classroom.section)
+            .all()
+        )
+
         if request.method == "POST":
             if not csrf_protect():
                 return redirect(request.referrer or url_for("teacher_dashboard"))
+
             title = request.form.get("title", "").strip()
             course = request.form.get("course", "").strip()
             description = request.form.get("description", "").strip()
@@ -624,11 +632,38 @@ def create_app():
             deadline_raw = request.form.get("deadline", "").strip()
             publish = request.form.get("publish") == "1"
 
+            class_ids = []
+            for raw_id in request.form.getlist("class_ids"):
+                try:
+                    class_id = int(raw_id)
+                except (TypeError, ValueError):
+                    continue
+                if class_id not in class_ids:
+                    class_ids.append(class_id)
+
+            selected_classes = [
+                classroom for classroom in classrooms
+                if classroom.id in class_ids
+            ]
+
+            form_data = request.form
+
             if not title or not description:
                 flash("Proje başlığı ve açıklaması zorunludur.", "error")
                 return render_template(
                     "teacher/project_form.html",
-                    form=request.form,
+                    form=form_data,
+                    classrooms=classrooms,
+                    selected_class_ids=class_ids,
+                )
+
+            if not selected_classes:
+                flash("Projeyi oluşturmak için en az bir sınıf seçmelisiniz.", "error")
+                return render_template(
+                    "teacher/project_form.html",
+                    form=form_data,
+                    classrooms=classrooms,
+                    selected_class_ids=class_ids,
                 )
 
             deadline = None
@@ -639,14 +674,18 @@ def create_app():
                     flash("Teslim tarihi biçimi geçersiz.", "error")
                     return render_template(
                         "teacher/project_form.html",
-                        form=request.form,
+                        form=form_data,
+                        classrooms=classrooms,
+                        selected_class_ids=class_ids,
                     )
 
             if deadline and deadline < utc_now():
                 flash("Teslim tarihi geçmişte olamaz.", "error")
                 return render_template(
                     "teacher/project_form.html",
-                    form=request.form,
+                    form=form_data,
+                    classrooms=classrooms,
+                    selected_class_ids=class_ids,
                 )
 
             project = Project(
@@ -658,19 +697,29 @@ def create_app():
                 deadline=deadline,
                 published=publish,
                 archived=False,
+                classes=selected_classes,
             )
             db.session.add(project)
             db.session.commit()
+
             flash(
                 "Proje oluşturuldu ve "
-                + ("tüm öğrencilere yayınlandı." if publish else "taslak olarak kaydedildi."),
+                + (
+                    f"{len(selected_classes)} sınıfa yayınlandı."
+                    if publish
+                    else "seçilen sınıflara hazırlandı."
+                ),
                 "success",
             )
-            return redirect(url_for("teacher_project_detail", project_id=project.id))
+            return redirect(
+                url_for("teacher_project_detail", project_id=project.id)
+            )
 
         return render_template(
             "teacher/project_form.html",
             form={},
+            classrooms=classrooms,
+            selected_class_ids=[],
         )
 
     @app.get("/teacher/projects/<int:project_id>")
