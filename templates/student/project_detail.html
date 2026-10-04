@@ -1,0 +1,49 @@
+<section class="detail-head student-detail">
+  <div class="detail-tags">
+    {% if project.course %}<span class="tag">{{ project.course }}</span>{% endif %}
+    {% if project.deadline %}<span class="tag tag-orange">SON TESLİM: {{ project.deadline|dt }}</span>{% else %}<span class="tag tag-green">SÜRESİZ</span>{% endif %}
+  </div>
+  <p class="detail-description">{{ project.description }}</p>
+  {% if project.requirements %}
+  <div class="requirements"><span class="section-kicker">GEREKSİNİMLER</span><p>{{ project.requirements }}</p></div>
+  {% endif %}
+</section>
+
+<section class="student-submit-layout">
+  <div class="section-block submit-panel">
+    <div class="section-head"><div><span class="section-kicker">TESLİM</span><h2>Proje dosyanız</h2></div></div>
+    {% if submission %}
+      <div class="current-submission">
+        <div class="file-symbol">FILE</div>
+        <div><strong>{{ submission.original_filename }}</strong><span>{{ submission.file_size|filesize }} · {{ submission.updated_at|dt }}</span></div>
+        <a class="icon-link" href="{{ url_for('student_download_submission', submission_id=submission.id) }}">İndir →</a>
+      </div>
+      <div class="submission-note"><span class="section-kicker">TESLİM NOTU</span><p>{{ submission.note or 'Not eklenmedi.' }}</p></div>
+      {% if submission.teacher_note %}
+        <div class="teacher-feedback"><span class="section-kicker">ÖĞRETMEN NOTU</span><p>{{ submission.teacher_note }}</p></div>
+      {% endif %}
+    {% endif %}
+
+    <form class="upload-zone" method="post" action="{{ url_for('student_submit', project_id=project.id) }}" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label for="project_file" class="file-drop {{ 'disabled' if locked else '' }}">
+        <span class="upload-icon">↑</span>
+        <strong>{{ 'Dosyanı güncelle' if submission else 'Proje dosyasını seç' }}</strong>
+        <span>ZIP, RAR, PDF, DOCX, PPTX, XLSX, kod dosyaları · en fazla 16 MB</span>
+        <span class="file-name" data-file-name>Dosya seçilmedi</span>
+      </label>
+      <input id="project_file" name="project_file" type="file" {% if not locked %}required{% else %}disabled{% endif %}>
+      <label class="field">
+        <span>Not (isteğe bağlı)</span>
+        <textarea name="note" rows="4" placeholder="Öğretmenin bilmesini istediğiniz bir not..." {% if locked %}disabled{% endif %}>{{ submission.note if submission else '' }}</textarea>
+      </label>
+      <button class="button button-dark" type="submit" {% if locked %}disabled{% endif %}>{{ 'Teslimi güncelle →' if submission else 'Projeyi teslim et →' }}</button>
+      {% if locked %}<div class="locked-message">Teslim süresi sona erdi. Yeni gönderim kapatıldı.</div>{% endif %}
+    </form>
+  </div>
+  <aside class="info-rail">
+    <div class="rail-block"><span class="section-kicker">SINIF</span><strong>{{ current_user().classroom.name if current_user().classroom else '—' }}</strong><small>Bu proje yalnızca bu sınıfa tanımlandı.</small></div>
+    <div class="rail-block"><span class="section-kicker">TESLİM TARİHİ</span><strong>{{ project.deadline|dt if project.deadline else 'Süresiz' }}</strong><small>Son tarih geçtiğinde yeni gönderim kapatılır.</small></div>
+    <div class="rail-block"><span class="section-kicker">DURUM</span><strong>{{ 'İncelendi' if submission and submission.review_status == 'reviewed' else 'Bekliyor' if submission else 'Teslim bekleniyor' }}</strong><small>{{ 'Öğretmen tesliminizi işaretledi.' if submission else 'Dosyanızı bu ekrandan yükleyin.' }}</small></div>
+  </aside>
+</section>
