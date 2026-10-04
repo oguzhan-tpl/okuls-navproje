@@ -1057,6 +1057,30 @@ def create_app():
         flash("Hesap durumu güncellendi.", "success")
         return redirect(url_for("chief_users"))
 
+    @app.post("/chief/users/<int:user_id>/class")
+    @login_required("chief")
+    def chief_change_student_class(user_id):
+        csrf_protect()
+        user = db.session.get(User, user_id)
+        if not user or user.role != "student":
+            abort(404)
+
+        class_id_raw = request.form.get("class_id", "").strip()
+        try:
+            class_id = int(class_id_raw)
+        except ValueError:
+            class_id = 0
+
+        classroom = db.session.get(Classroom, class_id)
+        if not classroom or not classroom.active:
+            flash("Geçerli ve aktif bir sınıf seçmelisiniz.", "error")
+            return redirect(url_for("chief_users"))
+
+        user.class_id = classroom.id
+        db.session.commit()
+        flash(f"{user.full_name} hesabı {classroom.name} sınıfına taşındı.", "success")
+        return redirect(url_for("chief_users"))
+
     @app.post("/chief/users/<int:user_id>/reset-password")
     @login_required("chief")
     def chief_reset_password(user_id):
