@@ -1,0 +1,40 @@
+<div class="student-page">
+  <section class="student-welcome">
+    <div>
+      <span class="eyebrow">AKTİF SINIF</span>
+      <h2>{{ current_user().classroom.name if current_user().classroom else 'Sınıf atanmadı' }}</h2>
+      <p>Merhaba {{ current_user().full_name }}. Size açılan projeler burada görünür.</p>
+    </div>
+  </section>
+  <section class="section-block">
+    <div class="section-head">
+      <div><span class="section-kicker">YAYINLANAN PROJELER</span><h2>Teslim listeniz</h2></div>
+      <span class="subtle">{{ projects|length }} aktif proje</span>
+    </div>
+    {% if projects %}
+    <div class="student-project-grid">
+      {% for project in projects %}
+        {% set submission = by_project.get(project.id) %}
+        <a class="student-project-card" href="{{ url_for('student_project_detail', project_id=project.id) }}">
+          <div class="card-top">
+            <span class="tag">{{ project.course or 'Proje' }}</span>
+            <span class="tag">{{ 'Teslim edildi' if submission else 'Teslim bekliyor' }}</span>
+          </div>
+          <h3>{{ project.title }}</h3>
+          <p>{{ project.description|truncate(140) }}</p>
+          <div class="card-foot">
+            <span>{{ project.deadline|dt if project.deadline else 'Süresiz' }}</span>
+            <strong>Detayı aç →</strong>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="eyebrow">GÜNCEL PROJE YOK</span>
+      <h3>Size atanmış yayınlanmış proje bulunmuyor.</h3>
+      <p>Öğretmeniniz proje yayınladığında burada görünecek.</p>
+    </div>
+    {% endif %}
+  </section>
+</div>
