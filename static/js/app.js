@@ -129,6 +129,11 @@
       const form = event.target;
       if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
       if (!form.hasAttribute("data-loading")) return;
+      form.querySelectorAll("button[type=\"submit\"]").forEach((button) => {
+        button.disabled = true;
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = "İşleniyor";
+      });
       showLoader(form);
     });
 
