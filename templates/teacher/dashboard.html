@@ -4,7 +4,7 @@
 {% block heading %}Projeler{% endblock %}
 {% block page_action %}<a class="button button-primary" href="{{ url_for('teacher_create_project') }}">Yeni proje <span>+</span></a>{% endblock %}
 {% block content %}
-<section class="hero"><div class="hero-copy"><span class="eyebrow">YAYIN & TESLİM MERKEZİ</span><h2>Çalışmalarınızı tek yerden yönetin.</h2><p>Projeyi oluşturun, yayınlayın ve teslimleri sınıf bazında izleyin. Yayınlanan her proje tüm aktif öğrencilere otomatik olarak açılır.</p></div><div class="hero-side"><div class="global-badge"><span class="global-dot"></span>Tüm sınıflara açık yayın</div></div></section>
+<section class="hero"><div class="hero-copy"><span class="eyebrow">YAYIN & TESLİM MERKEZİ</span><h2>Çalışmalarınızı tek yerden yönetin.</h2><p>Projeyi oluşturun, yayınlayın ve teslimleri sınıf bazında izleyin. Yayınlanan proje, yalnızca seçtiğiniz sınıflardaki aktif öğrencilere otomatik olarak açılır.</p></div><div class="hero-side"><div class="global-badge"><span class="global-dot"></span>Seçilen sınıflara açık yayın</div></div></section>
 <section class="metric-grid">
   <div class="metric accent"><div class="metric-head"><span class="metric-label">TOPLAM PROJE</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4zM8 6V4h8v2"/></svg></span></div><strong>{{ projects|length }}</strong><small>Arşiv dışı projeler</small></div>
   <div class="metric success"><div class="metric-head"><span class="metric-label">YAYINDA</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></div><strong>{{ published_count }}</strong><small>Tüm aktif öğrenciler görebilir</small></div>
