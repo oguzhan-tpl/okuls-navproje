@@ -730,41 +730,53 @@ def create_app():
         if not project or project.teacher_id != user.id:
             abort(404)
 
-        classrooms = (
-            Classroom.query.filter_by(active=True)
-            .order_by(Classroom.grade, Classroom.section)
-            .all()
-        )
-        students = (
-            User.query
-            .filter(User.role == "student", User.active.is_(True))
-            .order_by(User.class_id, User.full_name)
-            .all()
-        )
+        target_class_ids = {classroom.id for classroom in project.classes}
+        if target_class_ids:
+            classrooms = sorted(
+                project.classes,
+                key=lambda item: (item.grade, item.section),
+            )
+            students = (
+                User.query
+                .filter(
+                    User.role == "student",
+                    User.active.is_(True),
+                    User.class_id.in_(target_class_ids),
+                )
+                .order_by(User.class_id, User.full_name)
+                .all()
+            )
+        else:
+            # Legacy support: older projects without a class relation are treated
+            # as visible to all active students until the teacher republishes them
+            # with an explicit class selection.
+            classrooms = (
+                Classroom.query.filter_by(active=True)
+                .order_by(Classroom.grade, Classroom.section)
+                .all()
+            )
+            students = (
+                User.query
+                .filter(User.role == "student", User.active.is_(True))
+                .order_by(User.class_id, User.full_name)
+                .all()
+            )
+
         submissions = Submission.query.filter_by(project_id=project.id).all()
         by_student = {item.student_id: item for item in submissions}
 
         grouped = []
         for classroom in classrooms:
-            class_students = [s for s in students if s.class_id == classroom.id]
+            class_students = [
+                student for student in students
+                if student.class_id == classroom.id
+            ]
             grouped.append(
                 {
                     "classroom": classroom,
                     "students": [
                         {"student": student, "submission": by_student.get(student.id)}
                         for student in class_students
-                    ],
-                }
-            )
-
-        unassigned_students = [s for s in students if s.class_id is None]
-        if unassigned_students:
-            grouped.append(
-                {
-                    "classroom": None,
-                    "students": [
-                        {"student": student, "submission": by_student.get(student.id)}
-                        for student in unassigned_students
                     ],
                 }
             )
