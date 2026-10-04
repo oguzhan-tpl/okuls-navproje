@@ -2,16 +2,25 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#242822">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
   <title>{{ code }} · Okul Sınav Proje</title>
 </head>
 <body class="error-body">
-  <div class="error-box">
-    <span class="eyebrow">OSP / {{ code }}</span>
-    <h1>{{ message }}</h1>
-    <p>İşlem tamamlanamadı. Ana sayfaya dönerek tekrar deneyebilirsiniz.</p>
-    <a class="button button-dark" href="{{ url_for('home') }}">Ana sayfaya dön →</a>
-  </div>
+  <main class="error-shell">
+    <div class="error-card">
+      <div class="error-mark" aria-hidden="true">
+        <svg class="ui-svg" viewBox="0 0 24 24"><path d="M12 4 21 20H3L12 4Z"/><path d="M12 9v5M12 17v.1"/></svg>
+      </div>
+      <span class="error-code">OSP / {{ code }}</span>
+      <h1>{{ message }}</h1>
+      <p>Bağlantı veya sunucu tarafındaki geçici bir sorun nedeniyle işlem tamamlanamadı. Tekrar deneyebilirsiniz.</p>
+      <div class="error-actions">
+        <a class="button button-primary" href="{{ request.full_path if request.full_path else request.path }}">Tekrar dene</a>
+        <a class="button button-ghost" href="{{ url_for('home') }}">Ana sayfa</a>
+      </div>
+    </div>
+  </main>
 </body>
 </html>
