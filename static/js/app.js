@@ -217,6 +217,20 @@
         }
       };
 
+      const closeMenu = () => {
+        if (!menu) return;
+        menu.hidden = true;
+        classPicker.classList.remove("is-open");
+        trigger?.setAttribute("aria-expanded", "false");
+      };
+
+      const openMenu = () => {
+        if (!menu) return;
+        menu.hidden = false;
+        classPicker.classList.add("is-open");
+        trigger?.setAttribute("aria-expanded", "true");
+      };
+
       const createArrivalSlot = () => {
         if (!pills) return null;
         const slot = document.createElement("span");
