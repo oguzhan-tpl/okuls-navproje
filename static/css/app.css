@@ -322,3 +322,17 @@ button:disabled,input:disabled,textarea:disabled{cursor:not-allowed;opacity:.55}
   .account-row{padding:11px 13px}
   .account-tools form:first-of-type,.account-tools form:nth-of-type(2){position:static;width:100%;box-shadow:none}
 }
+
+
+/* Chief access */
+.chief-auth{min-height:100vh;display:grid;place-items:center;padding:24px;background:
+  radial-gradient(circle at 18% 20%,rgba(54,184,217,.13),transparent 28%),
+  #080f1b}
+.chief-auth-card{width:min(520px,100%);min-height:650px;display:flex;flex-direction:column;padding:32px;color:#fff;background:#0d1829;border:1px solid #243249;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.chief-auth-copy{margin:auto 0 34px;padding-top:44px}
+.chief-auth-copy h1{font-size:56px;line-height:.98;letter-spacing:-.05em;font-weight:500;margin:0 0 18px}
+.chief-auth-copy p{margin:0;color:#8291a8;font-size:12px;line-height:1.8;max-width:410px}
+.chief-form{max-width:none}
+.chief-form label span{color:#71819a}
+.back-login{margin-top:22px;color:#8291a8;font-size:10px;text-decoration:underline;text-underline-offset:4px}
+.back-login:hover{color:#fff}
