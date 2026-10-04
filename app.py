@@ -9,6 +9,8 @@ from functools import wraps
 from io import BytesIO
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+
 from flask import (
     Flask, abort, flash, redirect, render_template, request,
     send_file, session, url_for
@@ -280,7 +282,10 @@ def create_app():
 
     @app.before_request
     def security_and_csrf():
-        session.setdefault("_csrf", secrets.token_urlsafe(32))
+        # CSRF token artık Flask session'ına bağlı değil. Böylece aynı hesabın
+        # birden fazla sekmesinde veya deploy/restart sonrasında eski form token'ı
+        # yüzünden gereksiz 400 hataları oluşmaz.
+        return None
 
     @app.after_request
     def security_headers(response):
@@ -290,9 +295,11 @@ def create_app():
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; img-src 'self' data: https://images.unsplash.com; "
-            "style-src 'self'; script-src 'self'; "
-            "font-src 'self'; frame-ancestors 'self'"
+            "style-src 'self'; script-src 'self'; font-src 'self'; frame-ancestors 'self'"
         )
+        if request.endpoint in {"home", "login"}:
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            response.headers["Pragma"] = "no-cache"
         return response
 
     @app.errorhandler(RequestEntityTooLarge)
@@ -326,10 +333,29 @@ def create_app():
             message="Veri hizmeti şu anda geçici olarak kullanılamıyor.",
         ), 503
 
+    def csrf_serializer():
+        return URLSafeTimedSerializer(
+            app.config["SECRET_KEY"],
+            salt="okul-sinav-proje-csrf-v1",
+        )
+
+    def csrf_token():
+        return csrf_serializer().dumps(
+            {"nonce": secrets.token_urlsafe(18)}
+        )
+
     def csrf_protect():
-        token = request.form.get("_csrf") or request.headers.get("X-CSRF-Token")
-        if not token or not secrets.compare_digest(token, session.get("_csrf", "")):
-            abort(400, description="Geçersiz güvenlik belirteci.")
+        token = (request.form.get("_csrf") or request.headers.get("X-CSRF-Token") or "").strip()
+        if not token:
+            flash("Güvenlik oturumu yenilendi. Lütfen işlemi tekrar gönderin.", "error")
+            return False
+
+        try:
+            csrf_serializer().loads(token, max_age=60 * 60 * 12)
+            return True
+        except (BadSignature, SignatureExpired):
+            flash("Güvenlik oturumu yenilendi. Formu yeniden açıp tekrar gönderin.", "error")
+            return False
 
     def get_current_user():
         uid = session.get("user_id")
@@ -342,7 +368,7 @@ def create_app():
         return user
 
     app.jinja_env.globals["current_user"] = get_current_user
-    app.jinja_env.globals["csrf_token"] = lambda: session.get("_csrf", "")
+    app.jinja_env.globals["csrf_token"] = csrf_token
 
     def login_required(*roles):
         def decorator(view):
@@ -466,7 +492,8 @@ def create_app():
         if request.method == "GET" and request.args.get("role") == "chief":
             return render_template("chief_login.html")
         if request.method == "POST":
-            csrf_protect()
+            if not csrf_protect():
+                return redirect(url_for("login"))
             role = request.form.get("role", "").strip()
             username = request.form.get("username", "").strip().lower()
             password = request.form.get("password", "")
@@ -505,7 +532,8 @@ def create_app():
 
     @app.post("/logout")
     def logout():
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(url_for("home"))
         session.clear()
         return redirect(url_for("home"))
 
@@ -662,7 +690,8 @@ def create_app():
     @app.post("/teacher/projects/<int:project_id>/toggle")
     @login_required("teacher")
     def teacher_project_toggle(project_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("teacher_dashboard"))
         project = db.session.get(Project, project_id)
         if not project or project.teacher_id != get_current_user().id:
             abort(404)
@@ -694,7 +723,8 @@ def create_app():
     @app.post("/teacher/submissions/<int:submission_id>/review")
     @login_required("teacher")
     def teacher_review_submission(submission_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("teacher_dashboard"))
         submission = db.session.get(Submission, submission_id)
         if (
             not submission
@@ -951,7 +981,8 @@ def create_app():
     @app.post("/chief/users/<int:user_id>/delete")
     @login_required("chief")
     def chief_delete_user(user_id):
-        csrf_protect()
+        if not csrf_protect():
+            return redirect(request.referrer or url_for("chief_users"))
         user = db.session.get(User, user_id)
         if not user or user.role != "teacher":
             abort(404)
