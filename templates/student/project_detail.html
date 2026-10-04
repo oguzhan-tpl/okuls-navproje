@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} · Öğrenci{% endblock %}
+{% block kicker %}ÖĞRENCİ PANELİ / PROJE{% endblock %}
+{% block heading %}{{ project.title }}{% endblock %}
+{% block content %}
 <section class="detail-head student-detail">
   <div class="detail-tags">
     {% if project.course %}<span class="tag">{{ project.course }}</span>{% endif %}
@@ -47,3 +52,4 @@
     <div class="rail-block"><span class="section-kicker">DURUM</span><strong>{{ 'İncelendi' if submission and submission.review_status == 'reviewed' else 'Bekliyor' if submission else 'Teslim bekleniyor' }}</strong><small>{{ 'Öğretmen tesliminizi işaretledi.' if submission else 'Dosyanızı bu ekrandan yükleyin.' }}</small></div>
   </aside>
 </section>
+{% endblock %}
