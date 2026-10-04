@@ -42,24 +42,24 @@ ALLOWED_EXTENSIONS = {
 }
 
 project_classes = db.Table(
-    "project_classes",
+    "osp_project_classes",
     db.Column(
         "project_id",
         db.Integer,
-        db.ForeignKey("projects.id", ondelete="CASCADE"),
+        db.ForeignKey("osp_projects.id", ondelete="CASCADE"),
         primary_key=True,
     ),
     db.Column(
         "classroom_id",
         db.Integer,
-        db.ForeignKey("classrooms.id", ondelete="CASCADE"),
+        db.ForeignKey("osp_classrooms.id", ondelete="CASCADE"),
         primary_key=True,
     ),
 )
 
 
 class Classroom(db.Model):
-    __tablename__ = "classrooms"
+    __tablename__ = "osp_classrooms"
 
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.SmallInteger, nullable=False)
@@ -87,7 +87,7 @@ class Classroom(db.Model):
 
 
 class User(db.Model):
-    __tablename__ = "users"
+    __tablename__ = "osp_users"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=True, index=True)
@@ -97,7 +97,7 @@ class User(db.Model):
     student_no = db.Column(db.String(40), nullable=True, unique=True, index=True)
     class_id = db.Column(
         db.Integer,
-        db.ForeignKey("classrooms.id", ondelete="SET NULL"),
+        db.ForeignKey("osp_classrooms.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
@@ -119,12 +119,12 @@ class User(db.Model):
 
 
 class Project(db.Model):
-    __tablename__ = "projects"
+    __tablename__ = "osp_projects"
 
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(
         db.Integer,
-        db.ForeignKey("users.id", ondelete="RESTRICT"),
+        db.ForeignKey("osp_users.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -163,18 +163,18 @@ class Project(db.Model):
 
 
 class Submission(db.Model):
-    __tablename__ = "submissions"
+    __tablename__ = "osp_submissions"
 
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey("projects.id", ondelete="CASCADE"),
+        db.ForeignKey("osp_projects.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     student_id = db.Column(
         db.Integer,
-        db.ForeignKey("users.id", ondelete="CASCADE"),
+        db.ForeignKey("osp_users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -407,7 +407,8 @@ def create_app():
             try:
                 with app.app_context():
                     # TiDB üzerinde uygulama tabloları yalnızca uygulama
-                    # veritabanında oluşturulur. normalize_db_url() /sys gibi
+                    # veritabanında oluşturulur. OSP_ tablolari eski şemayla
+                    # çakışmaz. normalize_db_url() /sys gibi
                     # sistem şemalarını DB_NAME (varsayılan: test) ile değiştirir.
                     db.create_all()
 
