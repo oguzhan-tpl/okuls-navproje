@@ -21,7 +21,7 @@
   <div class="project-table">
     {% for project in recent_projects %}
     <div class="project-row static-row">
-      <div class="project-index">{{ loop.index|string|length }}</div>
+      <div class="project-index">{{ "%02d"|format(loop.index) }}</div>
       <div class="project-main"><strong>{{ project.title }}</strong><span>{{ project.teacher.full_name }} · {{ project.classes|map(attribute='name')|join(', ') }}</span></div>
       <div class="project-stat"><small>DURUM</small><strong>{{ 'Yayında' if project.published else 'Taslak' }}</strong></div>
       <div class="project-stat"><small>TARİH</small><strong>{{ project.created_at|dt }}</strong></div>
