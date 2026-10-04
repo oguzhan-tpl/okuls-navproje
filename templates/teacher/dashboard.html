@@ -1,40 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Öğretmen · Projeler{% endblock %}
-{% block kicker %}ÖĞRETMEN PANELİ{% endblock %}
-{% block heading %}Projeleriniz{% endblock %}
-{% block page_action %}
-<a class="button button-dark compact" href="{{ url_for('teacher_create_project') }}">+ Yeni proje</a>
-{% endblock %}
+{% block title %}Öğretmen · Kontrol Merkezi{% endblock %}
+{% block kicker %}ÖĞRETMEN / KONTROL MERKEZİ{% endblock %}
+{% block heading %}Projeler{% endblock %}
+{% block page_action %}<a class="button button-primary" href="{{ url_for('teacher_create_project') }}">Yeni proje <span>+</span></a>{% endblock %}
 {% block content %}
+<section class="hero"><div class="hero-copy"><span class="eyebrow">YAYIN & TESLİM MERKEZİ</span><h2>Çalışmalarınızı tek yerden yönetin.</h2><p>Projeyi oluşturun, yayınlayın ve teslimleri sınıf bazında izleyin. Yayınlanan her proje tüm aktif öğrencilere otomatik olarak açılır.</p></div><div class="hero-side"><div class="global-badge"><span class="global-dot"></span>Tüm sınıflara açık yayın</div></div></section>
 <section class="metric-grid">
-  <div class="metric"><span>TOPLAM PROJE</span><strong>{{ projects|length }}</strong><small>Arşiv dışı</small></div>
-  <div class="metric"><span>YAYINDA</span><strong>{{ published_count }}</strong><small>Öğrenciler görebiliyor</small></div>
-  <div class="metric"><span>İNCELEME BEKLİYOR</span><strong>{{ pending_count }}</strong><small>Yeni teslim</small></div>
+  <div class="metric accent"><div class="metric-head"><span class="metric-label">TOPLAM PROJE</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4zM8 6V4h8v2"/></svg></span></div><strong>{{ projects|length }}</strong><small>Arşiv dışı projeler</small></div>
+  <div class="metric success"><div class="metric-head"><span class="metric-label">YAYINDA</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span></div><strong>{{ published_count }}</strong><small>Tüm aktif öğrenciler görebilir</small></div>
+  <div class="metric warning"><div class="metric-head"><span class="metric-label">İNCELEME BEKLEYEN</span><span class="metric-icon"><svg class="ui-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg></span></div><strong>{{ pending_count }}</strong><small>Yeni öğrenci teslimleri</small></div>
 </section>
-
-<section class="section-block">
-  <div class="section-head">
-    <div><span class="section-kicker">PROJE LİSTESİ</span><h2>Takip edilen çalışmalar</h2></div>
-    <span class="subtle">{{ projects|length }} kayıt</span>
-  </div>
-
-  {% if projects %}
-    <div class="project-table">
-      {% for project, submission_count in projects %}
-        <a class="project-row" href="{{ url_for('teacher_project_detail', project_id=project.id) }}">
-          <div class="project-index">{{ "%02d"|format(loop.index) }}</div>
-          <div class="project-main">
-            <strong>{{ project.title }}</strong>
-            <span>{{ project.course or 'Ders belirtilmedi' }} · {{ project.classes|map(attribute='name')|join(', ') }}</span>
-          </div>
-          <div class="project-stat"><small>TESLİM</small><strong>{{ submission_count }}</strong></div>
-          <div class="project-stat"><small>DURUM</small><strong>{{ 'Yayında' if project.published else 'Taslak' }}</strong></div>
-          <div class="project-arrow">→</div>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state"><span class="eyebrow">HENÜZ PROJE YOK</span><h3>İlk projenizi oluşturun.</h3><p>Sınıfları seçin, projeyi yayınlayın ve teslimleri tek ekranda toplamaya başlayın.</p><a class="button button-dark" href="{{ url_for('teacher_create_project') }}">Proje oluştur →</a></div>
-  {% endif %}
-</section>
+<section class="section-block"><div class="section-head"><div><span class="section-kicker">PROJE PORTFÖYÜ</span><h2>Çalışmalar</h2></div><span class="subtle">{{ projects|length }} kayıt</span></div>
+{% if projects %}<div class="project-grid">{% for project,submission_count in projects %}<a class="project-card" href="{{ url_for('teacher_project_detail',project_id=project.id) }}"><div class="project-card-top"><span class="project-index">{{ "%02d"|format(loop.index) }}</span><span class="tag {{ 'tag-green' if project.published else 'tag-neutral' }}">{{ 'YAYINDA' if project.published else 'TASLAK' }}</span></div><h3>{{ project.title }}</h3><p>{{ project.description|truncate(145) }}</p><div class="project-card-foot"><span>{{ project.course or 'Ders belirtilmedi' }}</span><strong>{{ submission_count }} teslim →</strong></div></a>{% endfor %}</div>{% else %}<div class="empty-state"><div class="empty-icon"><svg class="ui-svg" viewBox="0 0 24 24"><path d="M4 6h16v13H4zM8 6V4h8v2"/></svg></div><h3>Henüz proje yok.</h3><p>Bir proje oluşturup yayınladığınızda tüm aktif öğrencilerin panellerinde görünür.</p><a class="button button-dark" href="{{ url_for('teacher_create_project') }}">İlk projeyi oluştur</a></div>{% endif %}</section>
 {% endblock %}
