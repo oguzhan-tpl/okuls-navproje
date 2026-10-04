@@ -3,11 +3,6 @@
 {% block kicker %}ÖĞRENCİ PANELİ / PROJE{% endblock %}
 {% block heading %}{{ project.title }}{% endblock %}
 {% block content %}
-{% extends "base.html" %}
-{% block title %}{{ project.title }} · Öğrenci{% endblock %}
-{% block kicker %}ÖĞRENCİ PANELİ / PROJE{% endblock %}
-{% block heading %}{{ project.title }}{% endblock %}
-{% block content %}
 <section class="detail-head student-detail">
   <div class="detail-tags">
     {% if project.course %}<span class="tag">{{ project.course }}</span>{% endif %}
