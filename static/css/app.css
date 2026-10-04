@@ -1825,3 +1825,37 @@ body:before{
     opacity:.16;
   }
 }
+
+/* Final class-sphere rendering overrides — Web Animations API controls motion. */
+.class-selection-sphere{
+  display:block !important;
+  visibility:visible !important;
+  width:34px !important;
+  height:34px !important;
+  min-width:34px;
+  min-height:34px;
+  border-radius:50% !important;
+  opacity:1 !important;
+  pointer-events:none !important;
+  z-index:2147483000 !important;
+  transform:translate3d(0,0,0) scale(1);
+  background:
+    radial-gradient(circle at 30% 27%,#fff 0 6%,rgba(255,255,255,.72) 7% 14%,transparent 15%),
+    radial-gradient(circle at 66% 70%,#b26c76 0%,#82353d 45%,#561f25 100%) !important;
+  border:1px solid rgba(255,255,255,.9) !important;
+  box-shadow:
+    0 0 0 7px rgba(122,47,53,.08),
+    0 14px 32px rgba(55,20,25,.28),
+    inset -7px -8px 14px rgba(35,10,14,.24) !important;
+  will-change:transform,opacity,filter;
+  contain:layout paint;
+}
+.class-selection-sphere.is-flying{
+  animation:none !important;
+}
+.selected-class-pill.pill-awaiting{
+  opacity:0 !important;
+}
+.selected-class-pill.pill-settle{
+  animation:class-pill-settle .42s cubic-bezier(.18,.9,.28,1.2) both !important;
+}
