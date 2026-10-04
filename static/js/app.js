@@ -333,9 +333,10 @@
         const input = option.querySelector("input");
         if (!input || input.checked) return;
 
-        const sourceRect = option.getBoundingClientRect();
+        const sourceElement = option.querySelector(".class-option-check") || option;
+        const sourceRect = sourceElement.getBoundingClientRect();
 
-        // The menu disappears immediately. No delay, no fade, no lingering overlay.
+        // Close immediately. The sphere is created only after the menu is gone.
         closeMenu();
 
         input.checked = true;
@@ -360,7 +361,6 @@
             pill.classList.remove("pill-awaiting");
             pill.classList.add("pill-settle");
             window.setTimeout(() => pill.classList.remove("pill-settle"), 460);
-            renderSelected();
           });
         });
 
