@@ -231,6 +231,13 @@
         trigger?.setAttribute("aria-expanded", "true");
       };
 
+      trigger?.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (!menu) return;
+        if (menu.hidden) openMenu();
+        else closeMenu();
+      });
+
       const createArrivalSlot = () => {
         if (!pills) return null;
         const slot = document.createElement("span");
