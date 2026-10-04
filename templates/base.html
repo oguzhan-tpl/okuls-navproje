@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#242822">
   <title>{% block title %}Okul Sınav Proje{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v='20261004-8') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v='20261004-9') }}">
 </head>
 <body class="app-body">
 <header class="mobile-header">
@@ -50,6 +50,7 @@
     <div class="page-wrap">{% block content %}{% endblock %}</div>
   </main>
 </div>
+<div class="class-selection-layer" data-class-selection-layer aria-hidden="true"></div>
 <div class="app-loader" data-app-loader aria-live="polite" aria-label="İşlem sürüyor">
   <div class="app-loader-card">
     <div class="app-loader-topline">
