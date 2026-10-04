@@ -296,7 +296,7 @@ def create_app():
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; img-src 'self' data:; "
+            "default-src 'self'; img-src 'self' data: https://images.unsplash.com; "
             "style-src 'self'; script-src 'self'; "
             "font-src 'self'; frame-ancestors 'self'"
         )
