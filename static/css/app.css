@@ -1828,6 +1828,9 @@ body:before{
 
 /* Final class-sphere rendering overrides — Web Animations API controls motion. */
 .class-selection-sphere{
+  position:fixed;
+  left:0;
+  top:0;
   display:block !important;
   visibility:visible !important;
   width:34px !important;
