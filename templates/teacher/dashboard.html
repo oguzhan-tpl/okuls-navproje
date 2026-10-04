@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Öğretmen · Projeler{% endblock %}
+{% block kicker %}ÖĞRETMEN PANELİ{% endblock %}
+{% block heading %}Projeleriniz{% endblock %}
+{% block page_action %}
+<a class="button button-dark compact" href="{{ url_for('teacher_create_project') }}">+ Yeni proje</a>
+{% endblock %}
+{% block content %}
+<section class="metric-grid">
+  <div class="metric"><span>TOPLAM PROJE</span><strong>{{ projects|length }}</strong><small>Arşiv dışı</small></div>
+  <div class="metric"><span>YAYINDA</span><strong>{{ published_count }}</strong><small>Öğrenciler görebiliyor</small></div>
+  <div class="metric"><span>İNCELEME BEKLİYOR</span><strong>{{ pending_count }}</strong><small>Yeni teslim</small></div>
+</section>
+
+<section class="section-block">
+  <div class="section-head">
+    <div><span class="section-kicker">PROJE LİSTESİ</span><h2>Takip edilen çalışmalar</h2></div>
+    <span class="subtle">{{ projects|length }} kayıt</span>
+  </div>
+
+  {% if projects %}
+    <div class="project-table">
+      {% for project, submission_count in projects %}
+        <a class="project-row" href="{{ url_for('teacher_project_detail', project_id=project.id) }}">
+          <div class="project-index">{{ "%02d"|format(loop.index) }}</div>
+          <div class="project-main">
+            <strong>{{ project.title }}</strong>
+            <span>{{ project.course or 'Ders belirtilmedi' }} · {{ project.classes|map(attribute='name')|join(', ') }}</span>
+          </div>
+          <div class="project-stat"><small>TESLİM</small><strong>{{ submission_count }}</strong></div>
+          <div class="project-stat"><small>DURUM</small><strong>{{ 'Yayında' if project.published else 'Taslak' }}</strong></div>
+          <div class="project-arrow">→</div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><span class="eyebrow">HENÜZ PROJE YOK</span><h3>İlk projenizi oluşturun.</h3><p>Sınıfları seçin, projeyi yayınlayın ve teslimleri tek ekranda toplamaya başlayın.</p><a class="button button-dark" href="{{ url_for('teacher_create_project') }}">Proje oluştur →</a></div>
+  {% endif %}
+</section>
+{% endblock %}
