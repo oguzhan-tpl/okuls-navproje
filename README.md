@@ -38,7 +38,7 @@ Okul içindeki proje dağıtım ve teslim sürecini tek panelde yöneten Flask +
 - project_classes: proje ile hedef sınıflar arasındaki ilişki
 - submissions: öğrenci teslimi, dosya içeriği ve inceleme durumu
 
-Teslim dosyaları Render'ın geçici dosya sistemine bırakılmaz. Dosya içeriği TiDB içinde MEDIUMBLOB olarak saklanır. Varsayılan yükleme sınırı 16 MB'dır.
+Teslim dosyaları Render'ın geçici dosya sistemine bırakılmaz. TiDB bağlantısında `sys` gibi sistem şemaları kullanılmaz; eski bir `/sys` bağlantısı gelirse uygulama otomatik olarak `/test` veritabanına yönlendirir. Dosya içeriği TiDB içinde MEDIUMBLOB olarak saklanır. Varsayılan yükleme sınırı 16 MB'dır.
 
 ## Güvenlik ve dayanıklılık
 
