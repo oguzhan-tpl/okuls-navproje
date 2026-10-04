@@ -1270,3 +1270,284 @@ body:before{
   .icon-button{background:var(--paper);border-color:var(--line);color:#5b554e}
   .main-area{background:transparent}
 }
+
+
+/* =========================================================
+   CLASS TARGETING / CHIP ORBIT UI
+   ========================================================= */
+.project-form-title{
+  position:relative;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+.project-title-copy{min-width:170px}
+.class-picker-wrap{
+  padding:0 18px 18px;
+}
+.class-picker-label{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:8px;
+}
+.class-picker-label>div>span{
+  display:block;
+  color:#777169;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+.class-picker-label strong{
+  display:block;
+  margin-top:3px;
+  color:#302c29;
+  font-size:11px;
+}
+.class-picker-label em{
+  color:#8a837b;
+  font-size:8px;
+  font-style:normal;
+  white-space:nowrap;
+}
+.class-combobox{position:relative}
+.class-combobox-trigger{
+  width:100%;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:9px 12px;
+  border:1px solid #d6d0c7;
+  border-radius:12px;
+  background:#faf8f4;
+  color:#302c29;
+  text-align:left;
+  transition:border-color .16s,box-shadow .16s,background .16s;
+}
+.class-combobox-trigger:hover{
+  background:#fff;
+  border-color:#bfaeaa;
+}
+.class-combobox.is-open .class-combobox-trigger{
+  background:#fff;
+  border-color:#9f6b6f;
+  box-shadow:0 0 0 4px rgba(122,47,53,.075);
+}
+.class-trigger-icon{
+  width:37px;
+  height:37px;
+  flex:0 0 37px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#f0e8e6;
+  color:#7a2f35;
+}
+.class-trigger-copy{min-width:0;flex:1}
+.class-trigger-copy strong{
+  display:block;
+  font-size:11px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.class-trigger-copy small{
+  display:block;
+  margin-top:4px;
+  color:#8b837b;
+  font-size:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.class-trigger-chevron{
+  flex:0 0 auto;
+  color:#776f68;
+  transition:transform .18s ease;
+}
+.class-combobox.is-open .class-trigger-chevron{transform:rotate(180deg)}
+.class-combobox-menu{
+  position:absolute;
+  z-index:60;
+  left:0;
+  right:0;
+  top:calc(100% + 8px);
+  padding:8px;
+  border:1px solid #d7d0c7;
+  border-radius:14px;
+  background:#fffdfa;
+  box-shadow:0 22px 50px rgba(41,39,36,.17);
+  transform-origin:top center;
+  animation:class-menu-in .16s ease both;
+}
+.class-menu-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:7px 7px 9px;
+  border-bottom:1px solid #ebe5de;
+}
+.class-menu-head>span{
+  color:#8a827a;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.13em;
+}
+.class-menu-head button{
+  border:0;
+  background:transparent;
+  color:#7a2f35;
+  font-size:8px;
+  font-weight:950;
+  padding:5px 2px;
+}
+.class-option-list{
+  display:grid;
+  gap:3px;
+  max-height:255px;
+  overflow:auto;
+  padding-top:6px;
+}
+.class-option{
+  position:relative;
+  min-height:55px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:10px;
+  cursor:pointer;
+  transition:background .13s,border-color .13s,transform .13s;
+}
+.class-option:hover{
+  background:#f6f2ed;
+  border-color:#e4ddd5;
+}
+.class-option.is-selected{
+  background:#f4ebeb;
+  border-color:#e4d1d2;
+  transform:translateX(2px);
+}
+.class-option input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.class-option-check{
+  width:25px;
+  height:25px;
+  flex:0 0 25px;
+  display:grid;
+  place-items:center;
+  border:1px solid #d2cbc2;
+  border-radius:7px;
+  background:#fff;
+  color:transparent;
+  transition:all .15s;
+}
+.class-option-check .ui-svg{width:14px;height:14px}
+.class-option.is-selected .class-option-check{
+  color:#fff;
+  border-color:#7a2f35;
+  background:#7a2f35;
+  transform:scale(1.03);
+}
+.class-option-copy{min-width:0}
+.class-option-copy strong{
+  display:block;
+  color:#393531;
+  font-size:10px;
+}
+.class-option-copy small{
+  display:block;
+  margin-top:2px;
+  color:#928b83;
+  font-size:7px;
+}
+.class-option-dot{
+  width:7px;
+  height:7px;
+  margin-left:auto;
+  border-radius:50%;
+  background:#d7d0c7;
+  transition:all .15s;
+}
+.class-option.is-selected .class-option-dot{
+  background:#9d696c;
+  box-shadow:0 0 0 4px rgba(122,47,53,.07);
+}
+.class-menu-empty{
+  padding:18px 10px;
+  color:#8d867e;
+  font-size:9px;
+  text-align:center;
+}
+.selected-class-pills{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-left:auto;
+  max-width:min(58%,650px);
+}
+.selected-class-pill{
+  position:relative;
+  min-height:29px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 9px 0 7px;
+  border:1px solid #dbcacc;
+  border-radius:999px;
+  background:#f4e9e9;
+  color:#743138;
+  box-shadow:0 4px 12px rgba(60,35,35,.055);
+}
+.selected-class-pill strong{
+  font-size:8px;
+  font-weight:950;
+}
+.selected-class-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#8e5055;
+  box-shadow:0 0 0 3px rgba(122,47,53,.08);
+}
+.selected-class-pill.pill-enter{
+  animation:class-pill-fly .42s cubic-bezier(.2,.88,.28,1.22) both;
+}
+.class-picker-wrap:has(.class-option.is-selected) .class-picker-label em{
+  color:#7a2f35;
+  font-weight:900;
+}
+@keyframes class-menu-in{
+  0%{opacity:0;transform:translateY(-7px) scale(.985)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes class-pill-fly{
+  0%{opacity:0;transform:translateY(16px) scale(.72);filter:blur(2px)}
+  55%{opacity:1;transform:translateY(-5px) scale(1.06);filter:blur(0)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(max-width:720px){
+  .class-picker-wrap{padding:0 12px 13px}
+  .project-form-title{gap:9px}
+  .project-title-copy{min-width:140px}
+  .selected-class-pills{
+    width:100%;
+    max-width:none;
+    margin:0 0 0 40px;
+    order:4;
+  }
+  .selected-class-pill{min-height:28px}
+  .class-picker-label{align-items:flex-start;flex-direction:column;gap:4px}
+  .class-combobox-menu{position:fixed;left:11px;right:11px;top:122px;max-height:calc(100dvh - 145px)}
+  .class-option-list{max-height:calc(100dvh - 210px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .class-combobox-menu,.selected-class-pill{animation:none}
+}
