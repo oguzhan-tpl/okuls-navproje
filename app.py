@@ -41,22 +41,6 @@ ALLOWED_EXTENSIONS = {
     "xml", "zip"
 }
 
-project_classes = db.Table(
-    "osp_project_classes",
-    db.Column(
-        "project_id",
-        db.Integer,
-        db.ForeignKey("osp_projects.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    db.Column(
-        "classroom_id",
-        db.Integer,
-        db.ForeignKey("osp_classrooms.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-)
-
 
 class Classroom(db.Model):
     __tablename__ = "osp_classrooms"
@@ -74,13 +58,6 @@ class Classroom(db.Model):
         foreign_keys="User.class_id",
         lazy="selectin",
     )
-    projects = db.relationship(
-        "Project",
-        secondary=project_classes,
-        back_populates="classes",
-        lazy="selectin",
-    )
-
     __table_args__ = (
         db.UniqueConstraint("grade", "section", name="uq_classroom_grade_section"),
     )
@@ -147,12 +124,6 @@ class Project(db.Model):
         "User",
         back_populates="projects",
         foreign_keys=[teacher_id],
-    )
-    classes = db.relationship(
-        "Classroom",
-        secondary=project_classes,
-        back_populates="projects",
-        lazy="selectin",
     )
     submissions = db.relationship(
         "Submission",
@@ -573,11 +544,6 @@ def create_app():
     @app.route("/teacher/projects/new", methods=["GET", "POST"])
     @login_required("teacher")
     def teacher_create_project():
-        classrooms = (
-            Classroom.query.filter_by(active=True)
-            .order_by(Classroom.grade, Classroom.section)
-            .all()
-        )
         if request.method == "POST":
             csrf_protect()
             title = request.form.get("title", "").strip()
@@ -585,35 +551,12 @@ def create_app():
             description = request.form.get("description", "").strip()
             requirements = request.form.get("requirements", "").strip()
             deadline_raw = request.form.get("deadline", "").strip()
-            selected_ids = request.form.getlist("class_ids")
             publish = request.form.get("publish") == "1"
 
             if not title or not description:
                 flash("Proje başlığı ve açıklaması zorunludur.", "error")
                 return render_template(
                     "teacher/project_form.html",
-                    classrooms=classrooms,
-                    form=request.form,
-                )
-
-            try:
-                selected_ids = [int(value) for value in selected_ids]
-            except ValueError:
-                selected_ids = []
-
-            selected_classes = (
-                Classroom.query.filter(
-                    Classroom.id.in_(selected_ids),
-                    Classroom.active.is_(True),
-                ).all()
-                if selected_ids
-                else []
-            )
-            if not selected_classes:
-                flash("En az bir sınıf seçmelisiniz.", "error")
-                return render_template(
-                    "teacher/project_form.html",
-                    classrooms=classrooms,
                     form=request.form,
                 )
 
@@ -625,7 +568,6 @@ def create_app():
                     flash("Teslim tarihi biçimi geçersiz.", "error")
                     return render_template(
                         "teacher/project_form.html",
-                        classrooms=classrooms,
                         form=request.form,
                     )
 
@@ -633,7 +575,6 @@ def create_app():
                 flash("Teslim tarihi geçmişte olamaz.", "error")
                 return render_template(
                     "teacher/project_form.html",
-                    classrooms=classrooms,
                     form=request.form,
                 )
 
@@ -647,18 +588,17 @@ def create_app():
                 published=publish,
                 archived=False,
             )
-            project.classes = selected_classes
             db.session.add(project)
             db.session.commit()
             flash(
-                "Proje oluşturuldu ve " + ("yayına alındı." if publish else "taslak olarak kaydedildi."),
+                "Proje oluşturuldu ve "
+                + ("tüm öğrencilere yayınlandı." if publish else "taslak olarak kaydedildi."),
                 "success",
             )
             return redirect(url_for("teacher_project_detail", project_id=project.id))
 
         return render_template(
             "teacher/project_form.html",
-            classrooms=classrooms,
             form={},
         )
 
@@ -670,22 +610,22 @@ def create_app():
         if not project or project.teacher_id != user.id:
             abort(404)
 
-        class_ids = [classroom.id for classroom in project.classes]
+        classrooms = (
+            Classroom.query.filter_by(active=True)
+            .order_by(Classroom.grade, Classroom.section)
+            .all()
+        )
         students = (
-            User.query.filter(
-                User.role == "student",
-                User.class_id.in_(class_ids),
-            )
+            User.query
+            .filter(User.role == "student", User.active.is_(True))
             .order_by(User.class_id, User.full_name)
             .all()
-            if class_ids
-            else []
         )
         submissions = Submission.query.filter_by(project_id=project.id).all()
         by_student = {item.student_id: item for item in submissions}
 
         grouped = []
-        for classroom in sorted(project.classes, key=lambda c: (c.grade, c.section)):
+        for classroom in classrooms:
             class_students = [s for s in students if s.class_id == classroom.id]
             grouped.append(
                 {
@@ -693,6 +633,18 @@ def create_app():
                     "students": [
                         {"student": student, "submission": by_student.get(student.id)}
                         for student in class_students
+                    ],
+                }
+            )
+
+        unassigned_students = [s for s in students if s.class_id is None]
+        if unassigned_students:
+            grouped.append(
+                {
+                    "classroom": None,
+                    "students": [
+                        {"student": student, "submission": by_student.get(student.id)}
+                        for student in unassigned_students
                     ],
                 }
             )
@@ -778,9 +730,8 @@ def create_app():
     def student_dashboard():
         user = get_current_user()
         active_projects = (
-            Project.query.join(Project.classes)
+            Project.query
             .filter(
-                Classroom.id == user.class_id,
                 Project.published.is_(True),
                 Project.archived.is_(False),
             )
@@ -790,8 +741,6 @@ def create_app():
                 Project.created_at.desc(),
             )
             .all()
-            if user.class_id
-            else []
         )
         submissions = Submission.query.filter(
             Submission.student_id == user.id
@@ -812,7 +761,6 @@ def create_app():
             not project
             or not project.published
             or project.archived
-            or user.class_id not in {c.id for c in project.classes}
         ):
             abort(404)
         submission = db.session.scalar(
