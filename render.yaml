@@ -1,10 +1,11 @@
 services:
   - type: web
     name: okuls-navproje
-    runtime: python
+    runtime: docker
     region: frankfurt
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --workers 1 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT app:app
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /healthz
     autoDeploy: true
     envVars:
@@ -13,18 +14,24 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: BOOTSTRAP_CHIEF_USERNAME
-        sync: false
+        value: alansefi
       - key: BOOTSTRAP_CHIEF_PASSWORD
-        sync: false
+        generateValue: true
       - key: BOOTSTRAP_CHIEF_NAME
         value: Alan Şefi
       - key: MAX_UPLOAD_MB
         value: "16"
-      - key: APP_TIMEZONE
-        value: Europe/Istanbul
       - key: DB_POOL_SIZE
         value: "3"
       - key: DB_MAX_OVERFLOW
         value: "2"
+      - key: APP_TIMEZONE
+        value: Europe/Istanbul
       - key: COOKIE_SECURE
         value: "true"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: GUNICORN_THREADS
+        value: "2"
+      - key: GUNICORN_TIMEOUT
+        value: "120"
