@@ -1,6 +1,51 @@
 (() => {
   "use strict";
 
+  /* OSP heartbeat: active browser tabs quietly touch /healthz every 4 minutes. */
+  let ospHeartbeatTimer = null;
+  let ospHeartbeatBusy = false;
+
+  const ospHeartbeat = () => {
+    if (ospHeartbeatBusy || document.hidden) return;
+    ospHeartbeatBusy = true;
+
+    fetch("/healthz?ts=" + Date.now(), {
+      method: "GET",
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "X-OSP-Heartbeat": "1" },
+      keepalive: true
+    })
+      .catch(() => {})
+      .finally(() => {
+        ospHeartbeatBusy = false;
+      });
+  };
+
+  const startOspHeartbeat = () => {
+    if (ospHeartbeatTimer !== null) return;
+    ospHeartbeatTimer = window.setInterval(ospHeartbeat, 4 * 60 * 1000);
+  };
+
+  const stopOspHeartbeat = () => {
+    if (ospHeartbeatTimer === null) return;
+    window.clearInterval(ospHeartbeatTimer);
+    ospHeartbeatTimer = null;
+  };
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopOspHeartbeat();
+      return;
+    }
+
+    ospHeartbeat();
+    startOspHeartbeat();
+  });
+
+  ospHeartbeat();
+  startOspHeartbeat();
+
   const loader = document.querySelector("[data-app-loader]");
   const loaderTitle = document.querySelector("[data-loader-title]");
   const loaderText = document.querySelector("[data-loader-text]");
